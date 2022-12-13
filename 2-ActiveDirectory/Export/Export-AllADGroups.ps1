@@ -11,7 +11,7 @@
 .COMPONENT 
     Connection to Active Directory or ruining the script directly on Active Directory
 .LINK 
-    Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
+    Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane/blob/main/2-ActiveDirectory/Export/Export-AllADGroups.ps1
 .Parameter ParameterName 
     All values are defined inside the variables region
 #>

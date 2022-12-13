@@ -12,7 +12,7 @@
     Required Module: Microsoft.Azure.ActiveDirectory.PIM.PSModule
     In case module is missing the script will request to install it
 .LINK 
-    Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
+    Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane/blob/main/3-AzureAD/Enable/Activate-PIM.ps1
 .Parameter ParameterName 
     All values are defined inside the variables region
 #>
