@@ -4,24 +4,23 @@
 
 # Project Information
 
-This repository contains a number of scripts that i have written or refactored to enhance it's performance. All the scripts are meant to make a day-to-day life easier for a Microsoft system administrator. These are provided for dree under the [GPL-3.0 license](https://github.com/llZektorll/Microsoft-PowerShell-Fastlane/blob/main/LICENSE)
+This repository contains a number of scripts that I have written or re-configured to enhance it's performance or to fit my needs. All the scripts are meant to make a day-to-day life easier for a Microsoft 365 Administrator and a System Administrator. These are provided for free under the MIT License.
 
 # Using the scripts
 
-To use the scripts it is recommended to download the repository since each script must be ran on you local machine or server. 
+To use the scripts it is recommended to download the repository since each script must be ran on you local machine/server. 
 For the scripts to work, ensure that you equipment allows the execution of Scripts with the following command:
 <code> set-executionpolicy remotesigned </code> Or <code> set-executionpolicy bypass </code>
 
-All the scripts are designed to be ran as a stand alone script, this means that every script will include all the necessary dependencies and/or modules. 
+All the scripts are designed to be ran as a stand alone script, this means that every script will include all the necessary dependencies and/or modules, including validation if the modules is installed and if not it will request the installation. The installation of the modules can be preformed directly from each script, if the option is rejected it will provide the necessary commands to install the module.
 
 # Leaning how to use PowerShell 
 
-If you are interested in leaning how to develop PowerShell scripts, i would recommend taking a look at [Automate administrative tasks by using PowerShell](https://learn.microsoft.com/en-us/training/paths/powershell/) since it's the learning path created by Microsoft. 
+If you are interested in leaning how to develop PowerShell scripts, I would recommend taking a look at [Automate administrative tasks by using PowerShell](https://learn.microsoft.com/en-us/training/paths/powershell/) since it's the learning path created by Microsoft. 
 You can also check the PowerShell tutorial from [Tutorial Point](https://www.tutorialspoint.com/powershell/index.htm) 
 
-# Other References
+# Licensing
 
-## Contribute to the project
-For contributions to the project please read the document [Contributing](https://github.com/llZektorll/Microsoft-PowerShell-Fastlane/blob/main/CONTRIBUTING.md)
+Licensed under the MIT License, you may not use the scripts except in compliance with the License.
 
-All folders contain a index of all the scripts as well as a explanation to what the script does in the README file
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
