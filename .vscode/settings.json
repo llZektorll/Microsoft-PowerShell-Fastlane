@@ -1,0 +1,233 @@
+//==========
+//VSCode Configurations 
+//==========
+{
+    // Default formater
+        "editor.defaultFormatter": "ms-vscode.powershell",
+    // Auto Format
+        "editor.formatOnSave": true,
+    // Allow drag and frop
+        "explorer.confirmDragAndDrop": false,
+    //Confirm file deletion
+        "explorer.confirmDelete": false,
+    // Ignore Missing Git
+        "git.ignoreMissingGitWarning": true,
+    // Side Bar Position
+        "workbench.sideBar.location": "right",
+    // Editor Minimap
+        "editor.minimap.enabled": false,
+    // Column Selection
+        "editor.columnSelection": false,
+    // Font and Font size
+        "editor.fontFamily": "CaskaydiaCove NF, Cascadia Code, Consolas NF, Inconsolata NF, Consolas, Courier New, monospace",
+        "debug.console.fontFamily": "CaskaydiaCove NF, Consolas NF, Inconsolata NF, Consolas, Courier New, monospace",
+        "editor.fontLigatures": true,
+        "editor.fontSize": 16,
+    // Auto save every 10 seconds
+        "files.autoSave": "afterDelay",
+        "files.autoSaveDelay": 10000,
+    // Always remember unsaved files
+        "files.hotExit": "onExitAndWindowClose",
+    // If no file is opened on load opene a blanck file
+        "workbench.startupEditor": "newUntitledFile",
+    // PowerShell is the default language
+        "files.defaultLanguage": "powershell",
+    // Ruler to try and keep the line not to long
+        "editor.rulers": [
+            120
+        ],
+    // PowerShell Intellisense first on suggestions
+        "editor.snippetSuggestions": "bottom",
+        "editor.suggest.snippetsPreventQuickSuggestions": false,
+    // Tab completion
+        "editor.tabCompletion": "on",
+    // Prevent update without permission
+        "update.enableWindowsBackgroundUpdates": false,
+    // Follow the OS theme default
+        "window.autoDetectColorScheme": true,
+    // VSCode allways openes maximized
+        "window.newWindowDimensions": "maximized",
+    //Easier for me to distinguish between multiple windows
+        "window.title": "${dirty}${remoteName}${separator}${rootName}${separator}${activeEditorShort}${separator}${appName}",
+        "window.titleSeparator": " | ",
+    
+    //==============
+    //Terminal Stuff
+    //==============
+        "terminal.explorerKind": "external",
+        "terminal.external.windowsExec": "wt",
+        "terminal.integrated.cursorBlinking": true,
+        "terminal.integrated.cursorStyle": "block",
+        "terminal.integrated.experimentalUseTitleEvent": true,
+        "terminal.integrated.fontSize": 16,
+        "terminal.integrated.scrollback": 9999,
+    //Causes a conflict with bracket pair colorizer
+        "editor.matchBrackets": "never",
+    
+    //Formatting Preferences
+        "powershell.codeFormatting.autoCorrectAliases": true,
+        "powershell.codeFormatting.newLineAfterOpenBrace": true,
+        "powershell.codeFormatting.openBraceOnSameLine": true,
+        "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationForFirstPipeline",
+        "powershell.codeFormatting.trimWhitespaceAroundPipe": true,
+        "powershell.codeFormatting.useConstantStrings": true,
+        "powershell.codeFormatting.useCorrectCasing": true,
+        "powershell.codeFormatting.whitespaceAfterSeparator": false,
+        "powershell.codeFormatting.whitespaceBetweenParameters": true,
+        "powershell.codeFormatting.preset": "OTBS",
+        "powershell.integratedConsole.suppressStartupBanner": true,
+        "powershell.pester.useLegacyCodeLens": false,
+        "powershell.powerShellDefaultVersion": "Windows PowerShell (x64)",
+        "powershell.promptToUpdatePowerShell": false,
+        "powershell.sideBar.CommandExplorerVisibility": false,
+        "powershell.startAsLoginShell.linux": true,
+    // ISE buttons to run the script
+        "powershell.buttons.showRunButtons": true,
+    
+    //Global Launch Configurations
+        "launch": {
+            "compounds": [],
+            "configurations": [
+                {
+                    "name": "PS: Interactive",
+                    "presentation": {
+                        "group": "Powershell"
+                    },
+                    "request": "launch",
+                    "type": "PowerShell"
+                },
+                {
+                    "cwd": "${file}",
+                    "name": "PS: Run",
+                    "presentation": {
+                        "group": "Powershell"
+                    },
+                    "request": "launch",
+                    "script": "${file}",
+                    "type": "PowerShell"
+                },
+                {
+                    "args": [
+                        "${command:SpecifyScriptArgs}"
+                    ],
+                    "cwd": "${file}",
+                    "name": "PS: Run w/ Args",
+                    "presentation": {
+                        "group": "Powershell"
+                    },
+                    "request": "launch",
+                    "script": "${file}",
+                    "type": "PowerShell"
+                },
+                {
+                    "args": [
+                        "${command:SpecifyScriptArgs}"
+                    ],
+                    "name": "PS: Pester",
+                    "presentation": {
+                        "group": "Powershell"
+                    },
+                    "request": "launch",
+                    "script": "Invoke-Pester",
+                    "type": "PowerShell"
+                },
+                {
+                    "name": "PS: Attach",
+                    "presentation": {
+                        "group": "Powershell"
+                    },
+                    "processId": "${command:PickPSHostProcess}",
+                    "request": "attach",
+                    "runspaceId": 1,
+                    "type": "PowerShell"
+                }
+            ]
+        },
+    
+    //==============
+    //Defalt Dark+ Theming Stuff
+    //==============
+    //Match to Default Dark+ Theme
+        "indentRainbow.colors": [
+            "#daadd620",
+            "#9cdcfe20",
+            "#DCDCAA20",
+            "#b5cea820",
+            "#C586C020",
+            "#569cd620",
+            "#D7BA7D20",
+            "#6a995520"
+        ],
+    
+        //Icon Stuff
+        "workbench.iconTheme": "vscode-icons",
+        "workbench.preferredLightColorTheme": "PowerShell ISE",
+        "vsicons.associations.files": [
+            {
+                "extensions": [
+                    "arm.json"
+                ],
+                "format": "svg",
+                "icon": "azure"
+            },
+            {
+                "extensions": [
+                    "parameters.json"
+                ],
+                "format": "svg",
+                "icon": "config"
+            },
+            {
+                "extensions": [
+                    "tests.ps1"
+                ],
+                "format": "svg",
+                "icon": "test"
+            },
+            {
+                "extensions": [
+                    "clixml"
+                ],
+                "format": "svg",
+                "icon": "xml"
+            }
+        ],
+        "vsicons.associations.folders": [
+            {
+                "extends": "dist",
+                "extensions": [
+                    "BuildOutput",
+                    "Output"
+                ],
+                "format": "svg",
+                "icon": "dist"
+            },
+            {
+                "extends": "helper",
+                "extensions": [
+                    "BuildHelpers"
+                ],
+                "format": "svg",
+                "icon": "helper"
+            }
+        ],
+        "vsicons.dontShowNewVersionMessage": true,
+        //Pretty!
+        "editor.cursorBlinking": "phase",    
+    }
+
+
+//=====
+//Instaled Extensions
+//
+/*
+Better Align -> https://marketplace.visualstudio.com/items?itemName=wwm.better-align
+Bracket Pair Colorization Toggler -> https://marketplace.visualstudio.com/items?itemName=dzhavat.bracket-pair-toggler
+Error Lens -> https://marketplace.visualstudio.com/items?itemName=usernamehw.errorlens
+Indent-Rainbow -> https://marketplace.visualstudio.com/items?itemName=oderwat.indent-rainbow
+Inline Values support for PowerShell -> https://marketplace.visualstudio.com/items?itemName=TylerLeonhardt.vscode-inline-values-powershell
+PowerShell -> https://marketplace.visualstudio.com/items?itemName=ms-vscode.PowerShell
+PowerShell Preview -> https://marketplace.visualstudio.com/items?itemName=ms-vscode.PowerShell-Preview
+VSCode Icons -> https://marketplace.visualstudio.com/items?itemName=vscode-icons-team.vscode-icons
+
+*/
