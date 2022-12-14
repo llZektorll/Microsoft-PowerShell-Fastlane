@@ -25,12 +25,12 @@ If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
 #region Global Variables
 # Log Section
 $logLocation = 'C:\Temp\Logs\'
-$logFile = 'Template-log.txt'
+$logFile = 'All_AD_Groups-log.txt'
 $logFileLocation = "$($logLocation)$($logFile)"
 $LogAppend = 1 # -> 1 = Retain previous log information | 2 = Delete old logs
 # Export Section
 $ExportPath = 'C:\Temp\Export\'
-$ExportFile = 'Export_Template-log.csv'
+$ExportFile = 'Export_All_AD_Groups-log.csv'
 $ExportFilePath = "$($ExportPath)$($ExportFile)"
 $ExportAppend = 1 # -> 1 = Retain previous Export information | 2 = Delete old Export
 # OU Section
