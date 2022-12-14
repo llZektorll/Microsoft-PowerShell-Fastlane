@@ -77,10 +77,10 @@ Function Connect-PIM {
                 Write-Log "`t Checking and installing updates, please wait..."
                 Install-Module -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule -AllowClobber -Confirm:$False -Force
                 Write-Log "`t Connecting to Exchange Online"
-                Connect-ExchangeOnline
+                Connect-PimService
             } Else {
                 Write-Log "`t Connecting to Exchange Online without check for module updates"
-                Connect-ExchangeOnline
+                Connect-PimService
             }
         } Catch {
             Write-Log "`t Error Connecting to EXO: $($_.Exception.Message)"
@@ -93,7 +93,7 @@ Function Connect-PIM {
                 Write-Log 'Installing Exchange Online Module, please wait ...'
                 Install-Module -Name Microsoft.Azure.ActiveDirectory.PIM.PSModule -AllowClobber -Confirm:$False -Force
                 Write-Log "`t Connecting to Exchange Online"
-                Connect-ExchangeOnline
+                Connect-PimService
             } Else {
                 Write-Log "`t Unable to run the script without Exchange Online Module."
                 Write-Log "`t Terminating the script. Press Enter to exit"
