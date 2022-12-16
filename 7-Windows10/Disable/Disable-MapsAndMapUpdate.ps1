@@ -1,15 +1,15 @@
 <# 
 .SYNOPSIS
-    A summary of how the script works and how to use it.
+    Disable Windows Maps Update
 .DESCRIPTION 
-    A long description of how the script works and how to use it.
+    Disable Windows option to automaticly donwload maps
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: YYYY-MM-DD (YYYY-MM-DD)
+    Creation Date: 2022-12-14 (YYYY-MM-DD)
     Change: Initial script development
 .COMPONENT 
-    Information about PowerShell Modules to be required.
+    
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 .Parameter ParameterName 
@@ -25,7 +25,7 @@ If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
 #region Global Variables
 # Log Section
 $logLocation = 'C:\Temp\'
-$logFile = 'Template-log.txt'
+$logFile = 'Disable-Maps_Update_And_Download-log.txt'
 $logFileLocation = "$($logLocation)$($logFile)"
 $LogAppend = 1 # -> 1 = Retain previous log information | 2 = Delete old logs
 #endregion
@@ -68,9 +68,9 @@ Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Checking file path's and files"
     CheckFilePath
-    Write-Log "`t Step 2 - Connecting to"
     Try {
-        Write-Log "`t Step 2.1 - "
+        Write-Log "`t Step 2 - Disabling Maps"
+        Set-ItemProperty -Path 'HKLM:\SYSTEM\Maps' -Name 'AutoUpdateEnabled' -Type DWord -Value 0
     } Catch {
         Write-Log "`t Error: $($_.Exception.Message)"
     }

@@ -1,12 +1,12 @@
 <# 
 .SYNOPSIS
-    A summary of how the script works and how to use it.
+    Add users to Group
 .DESCRIPTION 
-    A long description of how the script works and how to use it.
+    Add to Active Directory groups a single or multiple users from a CSV file
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: YYYY-MM-DD (YYYY-MM-DD)
+    Creation Date: 2022-12-14 (YYYY-MM-DD)
     Change: Initial script development
 .COMPONENT 
     Information about PowerShell Modules to be required.
@@ -25,9 +25,16 @@ If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
 #region Global Variables
 # Log Section
 $logLocation = 'C:\Temp\'
-$logFile = 'Template-log.txt'
+$logFile = 'Add-UserToADGroup-log.txt'
 $logFileLocation = "$($logLocation)$($logFile)"
 $LogAppend = 1 # -> 1 = Retain previous log information | 2 = Delete old logs
+# Group Section
+$Group = 'MyGroup'
+# Add User Section
+$AddOption = 1 # -> 1 - Add single user | 2 - Add from CSV
+$AddUser = 'MyUser@contoso.com'
+$AddCsv = 'C:\Temp\ListOfUsers.csv'
+$CsvDelimiter = ','
 #endregion
 
 #region Functions
@@ -68,9 +75,30 @@ Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Checking file path's and files"
     CheckFilePath
-    Write-Log "`t Step 2 - Connecting to"
     Try {
-        Write-Log "`t Step 2.1 - "
+        If ($AddOption -eq 1) {
+            Write-Log "`t Step 2 - Adding single user"
+            $User = Get-ADUser -Filter "$AddUser -eq '$_'" | Select-Object ObjectGUID
+            If ($User) {
+                Add-ADGroupMember -Identity $Group -Members $User
+                Write-Log "`t Step 2.1 - User $($_) added to $($Group)"
+            } Else {
+                Write-Log "`t Step 2.2 - Unable to find user in Active Directory"
+            }
+        } ElseIf ($AddOption -eq 2) {
+            Write-Log "`t Step 2 - Adding users from CSV file"
+            $MyCSV = (Import-Csv -Path $AddCsv -Delimiter $CsvDelimiter -Header 'users').Name
+            Foreach ($User in $MyCSV) {
+                $Acc = Get-ADUser -Filter "$User -eq '$_'" | Select-Object ObjectGUID
+                If ($Acc) {
+                    Add-ADGroupMember -Identity $Group -Members $Acc
+                    Write-Log "`t Step 2.1 - User $($User) added to $($Group)"
+                } Else {
+                    Write-Log "`t Step 2.1 - User $($User) not found in Active Directory"
+                }
+            }
+
+        }
     } Catch {
         Write-Log "`t Error: $($_.Exception.Message)"
     }

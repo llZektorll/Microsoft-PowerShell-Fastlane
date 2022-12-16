@@ -1,15 +1,15 @@
 <# 
 .SYNOPSIS
-    A summary of how the script works and how to use it.
+    Disable Menu Web Search
 .DESCRIPTION 
-    A long description of how the script works and how to use it.
+    Disable Windows auto search in the web from the start menu
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: YYYY-MM-DD (YYYY-MM-DD)
+    Creation Date: 2022-12-14 (YYYY-MM-DD)
     Change: Initial script development
 .COMPONENT 
-    Information about PowerShell Modules to be required.
+    
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 .Parameter ParameterName 
@@ -25,7 +25,7 @@ If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
 #region Global Variables
 # Log Section
 $logLocation = 'C:\Temp\'
-$logFile = 'Template-log.txt'
+$logFile = 'Disable-Menu_Wen_Search-log.txt'
 $logFileLocation = "$($logLocation)$($logFile)"
 $LogAppend = 1 # -> 1 = Retain previous log information | 2 = Delete old logs
 #endregion
@@ -68,9 +68,14 @@ Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Checking file path's and files"
     CheckFilePath
-    Write-Log "`t Step 2 - Connecting to"
     Try {
-        Write-Log "`t Step 2.1 - "
+        Write-Log "`t Step 2 - Disabling Web Search in Start Menu"
+        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search' -Name 'BingSearchEnabled' -Type DWord -Value 0
+        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search' -Name 'CortanaConsent' -Type DWord -Value 0
+        If (!(Test-Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search')) {
+            New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Force | Out-Null
+        }
+        Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Name 'DisableWebSearch' -Type DWord -Value 1
     } Catch {
         Write-Log "`t Error: $($_.Exception.Message)"
     }

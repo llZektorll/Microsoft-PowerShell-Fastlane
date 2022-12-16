@@ -1,12 +1,12 @@
 <# 
 .SYNOPSIS
-    A summary of how the script works and how to use it.
+    Disable Windows Location
 .DESCRIPTION 
-    A long description of how the script works and how to use it.
+    Disable Windows option to identify the equipment location
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: YYYY-MM-DD (YYYY-MM-DD)
+    Creation Date: 2022-12-14 (YYYY-MM-DD)
     Change: Initial script development
 .COMPONENT 
     Information about PowerShell Modules to be required.
@@ -68,9 +68,13 @@ Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Checking file path's and files"
     CheckFilePath
-    Write-Log "`t Step 2 - Connecting to"
     Try {
-        Write-Log "`t Step 2.1 - "
+        Write-Log "`t Step 2 - Disabling location services"
+        If (!(Test-Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors')) {
+            New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -Force | Out-Null
+        }
+        Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -Name 'DisableLocation' -Type DWord -Value 1
+        Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\LocationAndSensors' -Name 'DisableLocationScripting' -Type DWord -Value 1
     } Catch {
         Write-Log "`t Error: $($_.Exception.Message)"
     }

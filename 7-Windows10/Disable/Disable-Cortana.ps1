@@ -1,15 +1,15 @@
 <# 
 .SYNOPSIS
-    A summary of how the script works and how to use it.
+    Disable Cortana
 .DESCRIPTION 
-    A long description of how the script works and how to use it.
+    Disable all Cortana functions in Windows 10.
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: YYYY-MM-DD (YYYY-MM-DD)
+    Creation Date: 2022-12-14 (YYYY-MM-DD)
     Change: Initial script development
 .COMPONENT 
-    Information about PowerShell Modules to be required.
+    
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 .Parameter ParameterName 
@@ -25,7 +25,7 @@ If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
 #region Global Variables
 # Log Section
 $logLocation = 'C:\Temp\'
-$logFile = 'Template-log.txt'
+$logFile = 'Disable-Cortana-log.txt'
 $logFileLocation = "$($logLocation)$($logFile)"
 $LogAppend = 1 # -> 1 = Retain previous log information | 2 = Delete old logs
 #endregion
@@ -68,9 +68,29 @@ Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Checking file path's and files"
     CheckFilePath
-    Write-Log "`t Step 2 - Connecting to"
     Try {
-        Write-Log "`t Step 2.1 - "
+        Write-Log "`t Step 2 - Disabling Cortana"
+        If (!(Test-Path 'HKCU:\Software\Microsoft\Personalization\Settings')) {
+            New-Item -Path 'HKCU:\Software\Microsoft\Personalization\Settings' -Force | Out-Null
+        }
+        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Personalization\Settings' -Name 'AcceptedPrivacyPolicy' -Type DWord -Value 0
+        If (!(Test-Path 'HKCU:\Software\Microsoft\InputPersonalization\TrainedDataStore')) {
+            New-Item -Path 'HKCU:\Software\Microsoft\InputPersonalization\TrainedDataStore' -Force | Out-Null
+        }
+        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\InputPersonalization' -Name 'RestrictImplicitTextCollection' -Type DWord -Value 1
+        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\InputPersonalization' -Name 'RestrictImplicitInkCollection' -Type DWord -Value 1
+        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\InputPersonalization\TrainedDataStore' -Name 'HarvestContacts' -Type DWord -Value 0
+        Set-ItemProperty -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'ShowCortanaButton' -Type DWord -Value 0
+        Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\PolicyManager\default\Experience\AllowCortana' -Name 'Value' -Type DWord -Value 0
+        If (!(Test-Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search')) {
+            New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Force | Out-Null
+        }
+        Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search' -Name 'AllowCortana' -Type DWord -Value 0
+        If (!(Test-Path 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization')) {
+            New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization' -Force | Out-Null
+        }
+        Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization' -Name 'AllowInputPersonalization' -Type DWord -Value 0
+        Get-AppxPackage 'Microsoft.549981C3F5F10' | Remove-AppxPackage
     } Catch {
         Write-Log "`t Error: $($_.Exception.Message)"
     }

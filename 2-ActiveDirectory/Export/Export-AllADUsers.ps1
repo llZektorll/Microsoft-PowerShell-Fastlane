@@ -1,17 +1,17 @@
 <# 
 .SYNOPSIS
-    Export All AD Computers
+    Export All AD Users
 .DESCRIPTION 
-    Export all Computers registered on Active Directory
+    Export all users on Active Directory
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2022-12-13 (YYYY-MM-DD)
+    Creation Date: 2022-12-14 (YYYY-MM-DD)
     Change: Initial script development
 .COMPONENT 
     Connection to Active Directory or ruining the script directly on Active Directory
 .LINK 
-    Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane/blob/main/2-ActiveDirectory/Export/Export-AllADComputers.ps1
+    Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 .Parameter ParameterName 
     All values are defined inside the variables region
 #>
@@ -25,29 +25,26 @@ If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
 #region Global Variables
 # Log Section
 $logLocation = 'C:\Temp\Logs\'
-$logFile = 'Export_All_Computers_In_AD-log.txt'
+$logFile = 'All_AD_Users-log.txt'
 $logFileLocation = "$($logLocation)$($logFile)"
 $LogAppend = 1 # -> 1 = Retain previous log information | 2 = Delete old logs
 # Export Section
 $ExportPath = 'C:\Temp\Export\'
-$ExportFile = 'Export_All_Computers_In_AD.csv'
+$ExportFile = 'Export_All_AD_Users-log.csv'
 $ExportFilePath = "$($ExportPath)$($ExportFile)"
 $ExportAppend = 1 # -> 1 = Retain previous Export information | 2 = Delete old Export
-# Exported Information Section
-$Properties = @( # -> Information that will be exported
-    'Name',
-    'CanonicalName',
-    'OperatingSystem',
-    'OperatingSystemVersion',
-    'LastLogonDate',
-    'LogonCount',
-    'BadLogonCount',
-    'IPv4Address',
-    'Enabled',
-    'whenCreated'
-)
 # OU Section
 $OU = 'DC=contoso,DC=com'
+# Filter Section
+$Properties = @(
+    'Name',
+    'UserPrincipalName',
+    'distinguishedName'
+    'mail',
+    'extensionAttribute2',
+    'extensionAttribute3',
+    'extensionAttribute5'
+)
 #endregion
 
 #region Functions
@@ -102,29 +99,30 @@ function Write-Log {
 #region Execution
 Write-Log "`t Start Script Run"
 Try {
-    Write-Log "`t Step 1 - Checking file path's"
+    Write-Log "`t Step 1 - Checking file path's and files"
     CheckFilePath
     Write-Log "`t Step 2 - Colecting Information"
     Try {
-        Write-Log "`t Step 2.1 - Colecting Computer Information"
-        $Equipment = Get-ADComputer -Filter * -SearchBase $OU -Properties $Properties | Select-Object $Properties
-        Write-Log "`t Step 2.2 - Exporting Information"
-        Foreach ($PC in $Equipment) {
-            $ObjectDetail = [PSCustomObject][Ordered]@{
-                'Name'            = $PC.Name
-                'CanonicalName'   = $PC.CanonicalName
-                'OS'              = $PC.OperatingSystem
-                'OS Version'      = $PC.OperatingSystemVersion
-                'Last Logon'      = $PC.lastLogonDate
-                'Logon Count'     = $PC.logonCount
-                'Bad Logon Count' = $PC.BadLogonCount
-                'IP Address'      = $PC.IPv4Address
-                'Enabled'         = if ($PC.Enabled) { 'enabled' } else { 'disabled' }
-                'Date created'    = $PC.whenCreated
+        Write-Log "`t Step 2.1 - Colecting Users"
+        $GetUsers = Get-ADUser -SearchBase $OU -Properties $Properties | Select-Object $Properties
+        Write-Log "`t Step 2.2 - Exporting Informaiton"
+        Try {
+            Foreach ($User in $GetUsers) {
+                $ObjectDetail = [PSCustomObject][Ordered]@{
+                    'Name'                = $User.Name
+                    'UserPrincipalName'   = $User.UserPrincipalName
+                    'distinguishedName'   = $User.distinguishedName
+                    'mail'                = $User.mail
+                    'extensionAttribute2' = $User.extensionAttribute2
+                    'extensionAttribute3' = $User.extensionAttribute3
+                    'extensionAttribute5' = $User.extensionAttribute5
+                }
+                $ObjectDetail | Export-Csv $ExportFilePath -Delimiter ',' -Encoding UTF8 -NoClobber -NoTypeInformation -Append -Force
             }
-            $ObjectDetail | Export-Csv $ExportFilePath -Delimiter ',' -Encoding UTF8 -NoClobber -NoTypeInformation -Append -Force
+            Write-Log "`t Step 2.3 - Export compleated"
+        } Catch {
+            Write-Log "`t Error: $($_.Exception.Message)"
         }
-        Write-Log "`t Step 2.3 - Export Compleated"
     } Catch {
         Write-Log "`t Error: $($_.Exception.Message)"
     }

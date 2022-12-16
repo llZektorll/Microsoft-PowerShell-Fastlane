@@ -1,15 +1,15 @@
 <# 
 .SYNOPSIS
-    A summary of how the script works and how to use it.
+    Remove Teams Cach
 .DESCRIPTION 
-    A long description of how the script works and how to use it.
+    Removes cach for Teams local app
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: YYYY-MM-DD (YYYY-MM-DD)
+    Creation Date: 2022-12-14 (YYYY-MM-DD)
     Change: Initial script development
 .COMPONENT 
-    Information about PowerShell Modules to be required.
+    
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 .Parameter ParameterName 
@@ -25,7 +25,7 @@ If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
 #region Global Variables
 # Log Section
 $logLocation = 'C:\Temp\'
-$logFile = 'Template-log.txt'
+$logFile = 'Remove-Teams_Cach-log.txt'
 $logFileLocation = "$($logLocation)$($logFile)"
 $LogAppend = 1 # -> 1 = Retain previous log information | 2 = Delete old logs
 #endregion
@@ -68,9 +68,15 @@ Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Checking file path's and files"
     CheckFilePath
-    Write-Log "`t Step 2 - Connecting to"
+    Write-Log "`t Step 2 - Removing Cach from Teams"
     Try {
-        Write-Log "`t Step 2.1 - "
+        Write-Log "`t Step 2.1 - Closing Teams"
+        If (Get-Process -ProcessName Teams -ErrorAction SilentlyContinue) {
+            Get-Process -ProcessName Teams | Stop-Process -Force
+            Start-Sleep -Seconds 10
+        }
+        Write-Log "`t Step 2.1 - Removing cach files"
+        Get-ChildItem -Path $env:APPDATA\"Microsoft\teams" | Remove-Item -Recurse -Confirm:$False -Force
     } Catch {
         Write-Log "`t Error: $($_.Exception.Message)"
     }
