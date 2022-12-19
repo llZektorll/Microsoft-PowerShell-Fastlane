@@ -3,7 +3,7 @@
 //==========
 {
     // Default formater
-        "editor.defaultFormatter": "ms-vscode.powershell",
+        "editor.defaultFormatter": "ms-vscode.powershell-preview",
     // Auto Format
         "editor.formatOnSave": true,
     // Allow drag and frop
