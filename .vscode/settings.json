@@ -213,7 +213,11 @@
         ],
         "vsicons.dontShowNewVersionMessage": true,
         //Pretty!
-        "editor.cursorBlinking": "phase",    
+        "editor.cursorBlinking": "phase",
+        "[powershell]": {
+            "editor.defaultFormatter": "ms-vscode.powershell"
+        },
+        
     }
 
 
