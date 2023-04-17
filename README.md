@@ -10,7 +10,7 @@ This repository contains a number of scripts that I have written or re-configure
 
 To use the scripts it is recommended to download the repository since each script must be ran on you local machine/server. 
 For the scripts to work, ensure that you equipment allows the execution of Scripts with the following command:
-<code> set-executionpolicy remotesigned </code> Or <code> set-executionpolicy bypass </code>
+<code> set-executionpolicy Unrestricted </code>
 
 All the scripts are designed to be ran as a stand alone script, this means that every script will include all the necessary dependencies and/or modules, including validation if the modules is installed and if not it will request the installation. The installation of the modules can be preformed directly from each script, if the option is rejected it will provide the necessary commands to install the module.
 
