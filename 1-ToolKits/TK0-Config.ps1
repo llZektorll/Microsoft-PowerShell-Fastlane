@@ -84,7 +84,7 @@ Function Connect-EXO {
                 Connect-ExchangeOnline
             } Else {
                 Write-Log "`t Connecting to Exchange Online without check for module updates"
-                Connect-ExchangeOnline -TenantId $TenantId -ApplicationId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
+                Connect-ExchangeOnline -Organization $Tenant -AppId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
             }
         } Catch {
             Write-Log "`t Error Connecting to EXO: $($_.Exception.Message)"
@@ -97,7 +97,7 @@ Function Connect-EXO {
                 Write-Log 'Installing Exchange Online Module, please wait ...'
                 Install-Module -Name ExchangeOnlineManagement -AllowClobber -Confirm:$False -Force
                 Write-Log "`t Connecting to Exchange Online"
-                Connect-ExchangeOnline -TenantId $TenantId -ApplicationId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
+                Connect-ExchangeOnline -Organization $Tenant -AppId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
             } Else {
                 Write-Log "`t Unable to run the script without Exchange Online Module."
                 Write-Log "`t Terminating the script. Press Enter to exit"
@@ -120,10 +120,10 @@ Function Connect-SPO {
                 Write-Log "`t Checking and installing updates, please wait..."
                 Install-Module -Name Microsoft.Online.SharePoint.PowerShell -AllowClobber -Confirm:$False -Force
                 Write-Log "`t Connecting to SharePoint Online"
-                Connect-SPOService -Url $SPOAdminUrl -TenantId $TenantId -ApplicationId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
+                Connect-SPOService -Url $SPOAdminUrl -Organization $Tenant -AppID $ApplicationId -CertificateThumbprint $CertificateThumbPrint
             } Else {
                 Write-Log "`t Connecting to SharePoint Online without check for module updates"
-                Connect-SPOService -Url $SPOAdminUrl -TenantId $TenantId -ApplicationId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
+                Connect-SPOService -Url $SPOAdminUrl -Organization $Tenant -AppID $ApplicationId -CertificateThumbprint $CertificateThumbPrint
             }
         } Catch {
             Write-Log "`t Error Connecting to SPO: $($_.Exception.Message)"
@@ -136,7 +136,7 @@ Function Connect-SPO {
                 Write-Log 'Installing SharePoint Online Module, please wait ...'
                 Install-Module -Name Microsoft.Online.SharePoint.PowerShell -AllowClobber -Confirm:$False -Force
                 Write-Log "`t Connecting to SharePoint Online"
-                Connect-SPOService -Url $SPOAdminUrl -TenantId $TenantId -ApplicationId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
+                Connect-SPOService -Url $SPOAdminUrl -Organization $Tenant -AppID $ApplicationId -CertificateThumbprint $CertificateThumbPrint
             } Else {
                 Write-Log "`t Unable to run the script without SharePoint Online Module."
                 Write-Log "`t Terminating the script. Press Enter to exit"
@@ -159,10 +159,10 @@ Function Connect-PNPPS {
                 Write-Log "`t Checking and installing updates, please wait..."
                 Install-Module -Name PnP.PowerShell -AllowClobber -Confirm:$False -Force
                 Write-Log "`t Connecting to PnP PowerShell"
-                Connect-PnpPowerShellService -Url $SPOAdminUrl -TenantId $TenantId -ApplicationId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
+                Connect-PnpPowerShellService -Url $SPOAdminUrl -Organization $Tenant -AppID $ApplicationId -CertificateThumbprint $CertificateThumbPrint
             } Else {
                 Write-Log "`t Connecting to PnP PowerShell without check for module updates"
-                Connect-PnpPowerShellService -Url $SPOAdminUrl -TenantId $TenantId -ApplicationId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
+                Connect-PnpPowerShellService -Url $SPOAdminUrl -Organization $Tenant -AppID $ApplicationId -CertificateThumbprint $CertificateThumbPrint
             }
         } Catch {
             Write-Log "`t Error Connecting to PnpPowerShell: $($_.Exception.Message)"
@@ -175,7 +175,7 @@ Function Connect-PNPPS {
                 Write-Log 'Installing PnP PowerShell Module, please wait ...'
                 Install-Module -Name PnP.PowerShell -AllowClobber -Confirm:$False -Force
                 Write-Log "`t Connecting to PnP PowerShell"
-                Connect-PnpPowerShellService -Url $SPOAdminUrl -TenantId $TenantId -ApplicationId $ApplicationId -CertificateThumbprint $CertificateThumbPrint
+                Connect-PnpPowerShellService -Url $SPOAdminUrl -Organization $Tenant -AppID $ApplicationId -CertificateThumbprint $CertificateThumbPrint
             } Else {
                 Write-Log "`t Unable to run the script without PnP PowerShell Module."
                 Write-Log "`t Terminating the script. Press Enter to exit"
