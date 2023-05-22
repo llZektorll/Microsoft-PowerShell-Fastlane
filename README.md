@@ -8,7 +8,7 @@ This repository contains a number of scripts that I have written or re-configure
 
 ##  Project update
 
-This project have suffered a major update. All the files have been moved around to fit the new organization of the project.
+2022-05-22 -> This project have suffered a major update. All the files have been moved around to fit the new organization of the project.
 
 # Using the scripts
 
