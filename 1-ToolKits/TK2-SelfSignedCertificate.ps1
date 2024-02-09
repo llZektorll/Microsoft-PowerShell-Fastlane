@@ -1,10 +1,10 @@
 <# 
 .SYNOPSIS
-    Module Installation
+    Self Signed Certificate
 .DESCRIPTION 
-    Automatic installation of all modules for to manage Microsoft 365
+    Generate and install a Self Signed Certificate
 .NOTES 
-    Vertsion:   2.0
+    Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
     Creation Date: 2024-01-27 (YYYY-MM-DD)
 .LINK 
@@ -14,25 +14,24 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-
-#Modules to Install
-$Modules = @(
-    'AzureAD',
-    'ExchangeOnlineManagement',
-    'Microsoft.Graph',
-    'Microsoft.Online.SharePoint.PowerShell',
-    'MicrosoftTeams',
-    'PNP.PowerShell',
-    'MicrosoftPowerBIMgmt'
-)
+$ExportFile = "$($RootLocation)\Exports"
+# Certificate Variables
+$CertificateName = 'MyCertificate'
+$KeyDescription = 'Certificate for Azure App Registration'
+$Dates = 1 # Value in Years
+$File = 'MyCertificate.cer'
+$ExportFilePath = "$($ExportFile)\$($File)"
 #endregion 
 
 #region Functions
 
 #region Check Log File Location
 Function CheckFilePath {
-    If (Test-Path -Path "$($RootLocation)\Logs") {}Else {
+    If (Test-Path -Path "$($RootLocation)\Logs\") {}Else {
         New-Item "$($RootLocation)\Logs" -ItemType Directory
+    }
+    If (Test-Path -Path "$($RootLocation)\Exports\") {}Else {
+        New-Item "$($RootLocation)\Exports" -ItemType Directory
     }
 }
 #endregion
@@ -59,24 +58,18 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==            TK1 New Machine            =="
+Write-Log "`t ==          TK2 - Certificate            =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
+Write-Log "`t Start Script Run"
 Try {
-    Write-Log "`t Step 1 - Installing Modules"
-    $Step = 1
-    Foreach ($Module in $Modules) {
-        Try {
-            Install-Module -Name $Module -Confirm:$False -Force
-            Write-Log "`t Step 1.$Step - Module $Module installed"
-            $Step++
-        } Catch {
-            Write-Log "`t Step 1.1 - Unable to install $Module Module"
-            Write-Log "`t Error: $($_.Exception.Message)"
-        }
-    }
-    Write-Log "`t Step 1.$($Step) - All Modules installed"
+    Write-Log "`t Step 1 - Generating the certificate"
+    $Cert = New-SelfSignedCertificate -CertStoreLocation cert:\currentuser\my -Subject $CertificateName -KeyDescription $KeyDescription -NotAfter (Get-Date).AddYears($Dates)
+    $Cert.Thumbprint | clip
+    Write-Log "`t Step 1.1 - Export certificate"
+    Export-Certificate -Type CERT -Cert $Cert -FilePath $ExportFilePath
+    Write-Log "`t Step 1.2 - Certificate exported successfully, closing the script"
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }

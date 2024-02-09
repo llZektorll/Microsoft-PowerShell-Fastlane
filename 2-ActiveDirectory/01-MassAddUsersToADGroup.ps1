@@ -1,12 +1,12 @@
 <# 
 .SYNOPSIS
-    Module Installation
+    Add users to AD Group
 .DESCRIPTION 
-    Automatic installation of all modules for to manage Microsoft 365
+    Add to Active Directory groups multiple users from a CSV file
 .NOTES 
-    Vertsion:   2.0
+    Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-01-27 (YYYY-MM-DD)
+    Creation Date: 2024-01-28 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -14,24 +14,16 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-
-#Modules to Install
-$Modules = @(
-    'AzureAD',
-    'ExchangeOnlineManagement',
-    'Microsoft.Graph',
-    'Microsoft.Online.SharePoint.PowerShell',
-    'MicrosoftTeams',
-    'PNP.PowerShell',
-    'MicrosoftPowerBIMgmt'
-)
+#Goup Informaiton
+$ADGroup = 'MyGoup'
+$UserList = (Import-Csv -Path 'C:\Temp\File.csv' -Delimiter ',').User
 #endregion 
 
 #region Functions
 
 #region Check Log File Location
 Function CheckFilePath {
-    If (Test-Path -Path "$($RootLocation)\Logs") {}Else {
+    If (Test-Path -Path "$($RootLocation)\Logs\") {}Else {
         New-Item "$($RootLocation)\Logs" -ItemType Directory
     }
 }
@@ -59,24 +51,27 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==            TK1 New Machine            =="
+Write-Log "`t ==        ADD Users to AD Group          =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
 Try {
-    Write-Log "`t Step 1 - Installing Modules"
-    $Step = 1
-    Foreach ($Module in $Modules) {
-        Try {
-            Install-Module -Name $Module -Confirm:$False -Force
-            Write-Log "`t Step 1.$Step - Module $Module installed"
-            $Step++
-        } Catch {
-            Write-Log "`t Step 1.1 - Unable to install $Module Module"
-            Write-Log "`t Error: $($_.Exception.Message)"
+    Write-Log "`t Step 1 - Enforce TLS 1.2"
+    ForceTLS
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 2 - Adding users to the Group: $($ADGroup)"
+    Foreach ($Account in $UserList) {
+        $Acc = Get-ADUser -Filter "$User -eq '$Account'" | Select-Object ObjectGUID
+        If ($Acc) {
+            Add-ADGroupMember -Identity $Group -Members $Acc
+            Write-Log "`t Step 2.1 - User: $($Acc) added to thr group $($Group)"
+        } Else {
+            Write-Log "`t Error 2.1 - Unable to find or add the user $($Acc)"
         }
     }
-    Write-Log "`t Step 1.$($Step) - All Modules installed"
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }

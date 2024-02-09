@@ -1,30 +1,67 @@
 <# 
 .SYNOPSIS
-    Delete all file verions from a site
+    A summary of how the script works and how to use it.
 .DESCRIPTION 
-    Deletes all the versions of any file in the specified site
+    A long description of how the script works and how to use it.
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2023-05-11 (YYYY-MM-DD)
-    Change: Initial script development
-.COMPONENT 
-    Connection modules include 
+    Creation Date: 2024-MM-DD (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
-#Adding the configuration file to be ran 
-. '.\Microsoft-PowerShell-Fastlane\1-ToolKits\TK0-Config.ps1'
 #region Variables
-#site
+$Global:ErrorActionPreference = 'Stop'
+$RootLocation = 'C:\Temp'
+$LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
+# site information 
 $MySiteToClean = 'https://domain-admin.sharepoint.com/site/TestSite'
 #endregion 
 
 #region Functions
+#region Ensure TLS 1.2
+Function ForceTLS {
+    Try {
+        If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Write-Log "`t Forced TLS 1.2 since its not server default"
+        } Else {
+            Write-Log "`t TLS 1.2 already configured as server default"
+        }
+    } Catch {
+        Write-Log "`t Unable to check or ensure TLS 1.2 status"
+        Write-Log "`t Error: $($_.Exception.Message)"
+    }
+}
+#endregion
+#region Check Log File Location
+Function CheckFilePath {
+    If (Test-Path -Path "$($RootLocation)\Logs\") {}Else {
+        New-Item "$($RootLocation)\Logs" -ItemType Directory
+    }
+}
+#endregion
+#region Write Log
+function Write-Log {
+    param (
+        $Message,
+        $ForegroundColor = 'White'
+    )
+    function TimeStamp { return '[{0:yyyy/MM/dd} {0:HH:mm:ss}]' -f (Get-Date) }
 
+    "$(TimeStamp) $Message" | Tee-Object -FilePath $LogFile -Append | Write-Verbose
+    Write-Host $Message -ForegroundColor $ForegroundColor
+}
+#endregion
 #endregion
 
 #region Execution
+Try {
+    CheckFilePath
+} Catch {
+    Write-Host "`t Unable to check folders for logs"
+    Write-Host "`t Error: $($_.Exception.Message)"
+}
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==       Delete SPO File Versions        =="
@@ -32,25 +69,28 @@ Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
 Try {
-    Write-Log "`t Step 1 - Connecting to the Site with PNP PowerShell"
-    Connect-PNPPS
-    Connect-PnPOnline -Url $MySiteToClean -ClientId $clientID -Tenant $Tenant -Thumbprint $certThumbprint
+    Write-Log "`t Step 1 - Enforce TLS 1.2"
+    ForceTLS
 } Catch {
-    Write-Log "`t Step 1.1 - Unable to connec to the Site with PNP PowerShell"
     Write-Log "`t Error: $($_.Exception.Message)"
-    Exit
 }
 Try {
-    Write-Log "`t Step 2 - Gathering Information "
+    Write-Log "`t Step 2 - Connecting to PNP PowerShell"
+    Connect-PnPOnline -Url $MySiteToClean -Interactive
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 3 - Gathering Information"
     $Contx = Get-PnPContext
     $DocumentLibraries = Get-PnPList | Where-Object { $_.BaseType -eq 'DocumentLibrary' -and $_.Hidden -eq $false }
 } Catch {
     Write-Log "`t Step 2.1 - Unable to Gather Information "
     Write-Log "`t Error: $($_.Exception.Message)"
     Exit
-}
+} 
 Try {
-    Write-Log "`t Step 3 - Cleaning versions"
+    Write-Log "`t Step 4 - Cleaning versions"
     $i = 1
     $CountDocLib = $DocumentLibraries.count
     Foreach ($Library in $DocumentLibraries) {
@@ -72,7 +112,7 @@ Try {
         }
         $i++
     }
-    Write-Log "`t Step 3.1 - All file versions removed"
+    Write-Log "`t Step 4.1 - All file versions removed"
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }

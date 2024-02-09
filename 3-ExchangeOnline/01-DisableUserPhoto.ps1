@@ -1,12 +1,12 @@
 <# 
 .SYNOPSIS
-    Module Installation
+    Disable user photo
 .DESCRIPTION 
-    Automatic installation of all modules for to manage Microsoft 365
+    Removing permissions to edit the photo on the default policy.
 .NOTES 
-    Vertsion:   2.0
+    Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-01-27 (YYYY-MM-DD)
+    Creation Date: 2024-01-28 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -14,24 +14,27 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-
-#Modules to Install
-$Modules = @(
-    'AzureAD',
-    'ExchangeOnlineManagement',
-    'Microsoft.Graph',
-    'Microsoft.Online.SharePoint.PowerShell',
-    'MicrosoftTeams',
-    'PNP.PowerShell',
-    'MicrosoftPowerBIMgmt'
-)
 #endregion 
 
 #region Functions
-
+#region Ensure TLS 1.2
+Function ForceTLS {
+    Try {
+        If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Write-Log "`t Forced TLS 1.2 since its not server default"
+        } Else {
+            Write-Log "`t TLS 1.2 already configured as server default"
+        }
+    } Catch {
+        Write-Log "`t Unable to check or ensure TLS 1.2 status"
+        Write-Log "`t Error: $($_.Exception.Message)"
+    }
+}
+#endregion
 #region Check Log File Location
 Function CheckFilePath {
-    If (Test-Path -Path "$($RootLocation)\Logs") {}Else {
+    If (Test-Path -Path "$($RootLocation)\Logs\") {}Else {
         New-Item "$($RootLocation)\Logs" -ItemType Directory
     }
 }
@@ -59,27 +62,28 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==            TK1 New Machine            =="
+Write-Log "`t ==          Disable user Photos          =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
 Try {
-    Write-Log "`t Step 1 - Installing Modules"
-    $Step = 1
-    Foreach ($Module in $Modules) {
-        Try {
-            Install-Module -Name $Module -Confirm:$False -Force
-            Write-Log "`t Step 1.$Step - Module $Module installed"
-            $Step++
-        } Catch {
-            Write-Log "`t Step 1.1 - Unable to install $Module Module"
-            Write-Log "`t Error: $($_.Exception.Message)"
-        }
-    }
-    Write-Log "`t Step 1.$($Step) - All Modules installed"
+    Write-Log "`t Step 1 - Enforce TLS 1.2"
+    ForceTLS
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
-
+Try {
+    Write-Log "`t Step 2 - Connecting to Exchange Online"
+    Connect-ExchangeOnline
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 3 - Removing permissions to edit the photo on the default policy"
+    Set-OwaMailboxPolicy -Identity OwaMailboxPolicy-Default -SetPhotoEnabled $False
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Disconnect-ExchangeOnline
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion
