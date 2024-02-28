@@ -1,12 +1,12 @@
-<# 
+﻿<# 
 .SYNOPSIS
-    Short Desciption
+    Add files with verstion to spo site
 .DESCRIPTION 
-    Full discription
+    Add files with x versions to a SPO site
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-MM-DD (YYYY-MM-DD)
+    Creation Date: 2024-02-11 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -14,7 +14,18 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports\Export.csv"
+#Connection
+$SiteURL = 'https://domain.sharepoint.com/teams/TestSite'
+$Tenant = 'domain.onmicrosoft.com'
+$clientID = '7777777-7777-7777-7777-777777777'
+$certThumbprint = '0000000000000000000000000000000000'
+#Files
+$VersionCount = 100 # Number of versions for each file
+$File1 = 'C:\Temp\TheFile1.ps1'
+$File2 = 'C:\Temp\TheFile2.docx'
+$File3 = 'C:\Temp\TheFile3.xlsx'
+$File4 = 'C:\Temp\TheFile4.txt'
+$File5 = 'C:\Temp\TheFile5.csv'
 #endregion 
 
 #region Functions
@@ -66,7 +77,7 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==                title                  =="
+Write-Log "`t ==           Add files verions           =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
@@ -78,8 +89,24 @@ Try {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 2 - "
-
+    Write-Log "`t Step 2 - Connecting to PNP PowerShell"
+    Connect-PnPOnline -Url $SiteURL -ClientId $clientID -Tenant $Tenant -Thumbprint $certThumbprint
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 3 - Adding 100 versions of 5 files"
+    $i = 0
+    while ($i -ne $VersionCount) {
+        Write-Host $i
+        Add-PnPFile -Path $File1 -Folder 'Shared Documents/Test_1'
+        Add-PnPFile -Path $File2 -Folder 'Shared Documents/Test_1'
+        Add-PnPFile -Path $File3 -Folder 'Shared Documents/Test_1'
+        Add-PnPFile -Path $File4 -Folder 'Shared Documents/Test_1'
+        Add-PnPFile -Path $File5 -Folder 'Shared Documents/Test_1'
+        $i++
+    
+    }
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
