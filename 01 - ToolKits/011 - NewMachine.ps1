@@ -1,12 +1,10 @@
 <# 
-.SYNOPSIS
-    Export a list of all groups
 .DESCRIPTION 
-    Export a list with all Groups to a CSV
+    Installation of all the modules for Microsoft 365
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-02-07 (YYYY-MM-DD)
+    Creation Date: 2024-04-15 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -14,14 +12,31 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports\Export.csv"
-# Graph Connection 
-$TenantId = 'd4fb8b6e-8be8-4e16-bac7-80f408b457ff'
-$ApplicationId = '0bceae8e-9fb0-4a53-be09-32b227cfd093'
-$CertificateThumbPrint = '97FA2784B3D434F414B580C1357BB25C99A2A46F'
+#Modules to Install
+$Modules = @(
+    'AzureAD',
+    'ExchangeOnlineManagement',
+    'Microsoft.Graph',
+    'Microsoft.Online.SharePoint.PowerShell',
+    'MicrosoftTeams',
+    'PNP.PowerShell',
+    'MicrosoftPowerBIMgmt'
+)
 #endregion 
 
 #region Functions
+#region Variable Cleaner
+Function VarCleaner {
+    $RootLocation = $null
+    $LogFile = $null
+    $Message = $null
+    $ForegroundColor = $null
+    $Modules = $null
+    $Module = $null
+    $Step = $null
+    
+}
+#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -59,6 +74,7 @@ function Write-Log {
     Write-Host $Message -ForegroundColor $ForegroundColor
 }
 #endregion
+
 #endregion
 
 #region Execution
@@ -70,7 +86,7 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==          Export All Groups            =="
+Write-Log "`t ==          011 - New Machine            =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
@@ -81,42 +97,24 @@ Try {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 2 - Connecting to Exchange Online"
-    Connect-ExchangeOnline
-} Catch {
-    Write-Log "`t Error: $($_.Exception.Message)"
-}
-Try {
-    Write-Log "`t Step 3 - Connecting to Microsoft Graph"
-    Connect-MgGraph -ClientId $ApplicationId -CertificateThumbprint $CertificateThumbPrint -TenantId $TenantId
-} Catch {
-    Write-Log "`t Error: $($_.Exception.Message)"
-}
-Try {
-    Write-Log "`t Step 4 - Colecting All information"
-    $LicensedAccounts = Get-MgUser -All -Filter 'assignedLicenses/$count ne 0' -ConsistencyLevel eventual -CountVariable licensedUserCount -Property UserPrincipalName, DisplayName,assignedLicenses,LicenseAssignmentState
-    Foreach ($Account in $LicensedAccounts) {
-        $User = $Account.UserPrincipalName
-        $MailboxUser = Get-EXOMailbox -Identity $User
-        $MailboxStatistics = Get-EXOMailboxStatistics -Identity $User
-        $ArchiveStatus = Get-Mailbox -Identity $User | Select-Object ArchiveStatus
-        If ($ArchiveStatus.ArchiveStatus -like "Active") {
-            $MailboxArchive = Get-EXOMailboxStatistics -Identity $User -Archive
-        } Else {
-            $MailboxArchive = 'Disabled'
+    Write-Log "`t Step 2 - Installing Modules"
+    $Step = 1
+    Foreach ($Module in $Modules) {
+        Try {
+            Install-Module -Name $Module -Confirm:$False -Force
+            Write-Log "`t Step 2.$($Step) - Module $Module installed"
+            $Step++
+        } Catch {
+            Write-Log "`t Step 2.$($Step) - Unable to install $Module Module"
+            Write-Log "`t Error: $($_.Exception.Message)"
         }
-        
-        $UserData = [PSCustomObject]@{
-            'TimeStamp'   = Get-Date -Format 'yyyy-MM-dd'
-            'DisplayName' = $MailboxUser.DisplayName
-            'Account'     = $MailboxUser.Alias
-            'MailboxSize' = $MailboxStatistics.TotalItemSize
-            'ArchiveSize' = $MailboxArchive.TotalItemSize
-        }
-        $UserData | Export-Csv $ExportFile -Delimiter ',' -Encoding UTF8 -NoClobber -NoTypeInformation -Append -Force
     }
+    $Step = $null
+    $Modules = $null
+    $Module = $null
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
+VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

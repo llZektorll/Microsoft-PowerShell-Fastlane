@@ -1,12 +1,10 @@
 <# 
-.SYNOPSIS
-    Short Desciption
 .DESCRIPTION 
-    Full discription
+    Export all users from OU
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-MM-DD (YYYY-MM-DD)
+    Creation Date: 2024-04-15 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -14,10 +12,36 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports\Export.csv"
+$ExportFile = "$($RootLocation)\Exports\Export_$(Get-Date -Format 'yyyyMM').csv"
+# Users to Export
+$Properties = @(
+    'Name',
+    'UserPrincipalName',
+    'distinguishedName'
+    'mail',
+    'extensionAttribute2',
+    'extensionAttribute3',
+    'extensionAttribute5'
+)
+# OU Location
+$OU = 'DC=contoso,DC=com'
 #endregion 
 
 #region Functions
+#region Variable Cleaner
+Function VarCleaner {
+    $RootLocation = $null
+    $LogFile = $null
+    $ExportFile = $null
+    $Message = $null
+    $ForegroundColor = $null
+    $Properties = $null
+    $OU = $null
+    $GetUsers = $null
+    $User = $null
+    $ObjectDetail = $null
+}
+#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -66,7 +90,7 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==                title                  =="
+Write-Log "`t ==     024 - Expor all User from OU      =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
@@ -78,10 +102,24 @@ Try {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 2 - "
-
+    Write-Log "`t Step 2 - Collecting Users"
+    $GetUsers = Get-ADUser -SearchBase $OU -Properties $Properties | Select-Object $Properties
+    Write-Log "`t Step 2.2 - Exporting Informaiton"
+    Foreach ($User in $GetUsers) {
+        $ObjectDetail = [PSCustomObject][Ordered]@{
+            'Name'                = $User.Name
+            'UserPrincipalName'   = $User.UserPrincipalName
+            'distinguishedName'   = $User.distinguishedName
+            'mail'                = $User.mail
+            'extensionAttribute2' = $User.extensionAttribute2
+            'extensionAttribute3' = $User.extensionAttribute3
+            'extensionAttribute5' = $User.extensionAttribute5
+        }
+        $ObjectDetail | Export-Csv $ExportFile -Delimiter ',' -Encoding UTF8 -NoClobber -NoTypeInformation -Append -Force
+    }
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
+VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

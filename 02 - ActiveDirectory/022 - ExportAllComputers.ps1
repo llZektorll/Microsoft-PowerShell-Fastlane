@@ -1,12 +1,10 @@
 <# 
-.SYNOPSIS
-    Disable user photo
 .DESCRIPTION 
-    Removing permissions to edit the photo on the default policy.
+    Export all computers in a OU
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-01-28 (YYYY-MM-DD)
+    Creation Date: 2024-04-15 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -14,9 +12,38 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-#endregion 
-
+$ExportFile = "$($RootLocation)\Exports\Export_$(Get-Date -Format 'yyyyMM').csv"
+#Computer Information
+$Properties = @( # -> Information that will be exported
+    'Name',
+    'CanonicalName',
+    'OperatingSystem',
+    'OperatingSystemVersion',
+    'LastLogonDate',
+    'LogonCount',
+    'BadLogonCount',
+    'IPv4Address',
+    'Enabled',
+    'whenCreated'
+)
+#OU
+$OU = 'DC=contoso,DC=com'
+#endregion
 #region Functions
+#region Variable Cleaner
+Function VarCleaner {
+    $RootLocation = $null
+    $LogFile = $null
+    $ExportFile = $null
+    $Message = $null
+    $ForegroundColor = $null
+    $Properties = $null
+    $OU = $null
+    $Equipment = $null
+    $PC = $null
+    $ObjectDetail = $null
+}
+#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -36,6 +63,9 @@ Function ForceTLS {
 Function CheckFilePath {
     If (Test-Path -Path "$($RootLocation)\Logs\") {}Else {
         New-Item "$($RootLocation)\Logs" -ItemType Directory
+    }
+    If (Test-Path -Path "$($RootLocation)\Exports\") {}Else {
+        New-Item "$($RootLocation)\Exports" -ItemType Directory
     }
 }
 #endregion
@@ -62,28 +92,39 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==          Disable user Photos          =="
+Write-Log "`t ==  022 - Export All Computer from OU    =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Enforce TLS 1.2"
     ForceTLS
+    
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 2 - Connecting to Exchange Online"
-    Connect-ExchangeOnline
+    Write-Log "`t Step 2 - Collecting information"
+    $Equipment = Get-ADComputer -Filter * -SearchBase $OU -Properties $Properties | Select-Object $Properties
+    Write-Log "`t Step 1.2 - Exporting Information"
+    Foreach ($PC in $Equipment) {
+        $ObjectDetail = [PSCustomObject][Ordered]@{
+            'Name'            = $PC.Name
+            'CanonicalName'   = $PC.CanonicalName
+            'OS'              = $PC.OperatingSystem
+            'OS Version'      = $PC.OperatingSystemVersion
+            'Last Logon'      = $PC.lastLogonDate
+            'Logon Count'     = $PC.logonCount
+            'Bad Logon Count' = $PC.BadLogonCount
+            'IP Address'      = $PC.IPv4Address
+            'Enabled'         = if ($PC.Enabled) { 'enabled' } else { 'disabled' }
+            'Date created'    = $PC.whenCreated
+        }
+        $ObjectDetail | Export-Csv $ExportFile -Delimiter ',' -Encoding UTF8 -NoClobber -NoTypeInformation -Append -Force
+    }
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
-Try {
-    Write-Log "`t Step 3 - Removing permissions to edit the photo on the default policy"
-    Set-OwaMailboxPolicy -Identity OwaMailboxPolicy-Default -SetPhotoEnabled $False
-} Catch {
-    Write-Log "`t Error: $($_.Exception.Message)"
-}
-Disconnect-ExchangeOnline
+VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

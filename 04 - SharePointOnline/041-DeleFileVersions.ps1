@@ -1,12 +1,10 @@
 <# 
-.SYNOPSIS
-    Export OneDrive Quotas
 .DESCRIPTION 
-    Export a OneDrive usage report
+    Deletes all file versions in a site using PNP PowerShell
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-02-07 (YYYY-MM-DD)
+    Creation Date: 2024-04-15 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -14,13 +12,31 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports\Export.csv"
-#Connection
-$SPOAdminUrl = 'https://domain-admin.sharepoint.com'
-$OneDriveUserURL = 'https://domain.sharepoint.com/personal/'
+#Site information
+$MySiteToClean = 'https://domain-admin.sharepoint.com/site/TestSite'
 #endregion 
 
 #region Functions
+#region Variable Cleaner
+Function VarCleaner {
+    $RootLocation = $null
+    $LogFile = $null
+    $ExportFile = $null
+    $Message = $null
+    $ForegroundColor = $null
+    $MySiteToClean = $null
+    $Contx = $null
+    $DocumentLibraries = $null
+    $CountDocLib = $null
+    $Library = $null
+    $i = $null
+    $ListItems = $null
+    $Item = $null
+    $File = $null
+    $Versions = $null
+    $VersionsCount = $null
+}
+#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -40,9 +56,6 @@ Function ForceTLS {
 Function CheckFilePath {
     If (Test-Path -Path "$($RootLocation)\Logs\") {}Else {
         New-Item "$($RootLocation)\Logs" -ItemType Directory
-    }
-    If (Test-Path -Path "$($RootLocation)\Exports\") {}Else {
-        New-Item "$($RootLocation)\Exports" -ItemType Directory
     }
 }
 #endregion
@@ -69,7 +82,7 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==         User OneDrive Quotas          =="
+Write-Log "`t ==      041 - Delete File Versions       =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
@@ -81,18 +94,46 @@ Try {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 2 - Connecting to SharePoint Online"
-    Connect-SPOService -Url $SPOAdminUrl
+    Write-Log "`t Step 2 - Connecting to SharePoint With PNP PowerShell"
+    Connect-PnPOnline -Url $MySiteToClean -Interactive
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 3 - Gathering and exporting information"
-    $Info = Get-SPOSite -IncludePersonalSite:$True -Limit ALL -Filter "URL -like $($OneDriveUserURL)" | Select-Object Owner, StorageQuota, StorageUsageCurrent
-    $Info | Export-Csv $ExportFile -Delimiter ',' -Encoding UTF8 -NoClobber -NoTypeInformation -Append -Force
+    Write-Log "`t Step 3 - Gathering information"
+    $Contx = Get-PnPContext
+    $DocumentLibraries = Get-PnPList | Where-Object { $_.BaseType -eq 'DocumentLibrary' -and $_.Hidden -eq $false }
+    
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
-Disconnect-SPOService
+Try {
+    Write-Log "`t Step 4 - Cleaning versions"
+    $i = 1
+    $CountDocLib = $DocumentLibraries.count
+    Foreach ($Library in $DocumentLibraries) {
+        Write-Progress -Activity 'Cleaning Versions' -Status "Current count: $($i) of $($CountDocLib) Document Libraries" -PercentComplete (($i / $CountDocLib) * 100) 
+        Write-Log "`t Processing Document Library:'$Library.Title"
+        $ListItems = Get-PnPListItem -List $Library -PageSize 2000 | Where-Object { $_.FileSystemObjectType -eq 'File' }
+        Foreach ($Item in $ListItems) {
+            #Get File Versions
+            $File = $Item.File
+            $Versions = $File.Versions
+            $Contx.Load($File)
+            $Contx.Load($Versions)
+            $Contx.ExecuteQuery()
+            $VersionsCount = $Versions.Count
+            If ($VersionsCount -gt 0) {
+                $Versions.DeleteAll()
+                Invoke-PnPQuery
+            }
+        }
+        $i++
+    }
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Disconnect-PnPOnline
+VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

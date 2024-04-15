@@ -1,12 +1,10 @@
 <# 
-.SYNOPSIS
-    Self Signed Certificate
 .DESCRIPTION 
-    Generate and install a Self Signed Certificate
+    Create and install a certificate
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-01-27 (YYYY-MM-DD)
+    Creation Date: 2024-04-15 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -14,17 +12,45 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports"
-# Certificate Variables
+$ExportFile = "$($RootLocation)\Exports\"
+#Certificate Variables
 $CertificateName = 'MyCertificate'
 $KeyDescription = 'Certificate for Azure App Registration'
-$Dates = 1 # Value in Years
 $File = 'MyCertificate.cer'
-$ExportFilePath = "$($ExportFile)\$($File)"
+$Dates = 1 # Certificate valid for X years
 #endregion 
 
 #region Functions
+#region Variable Cleaner
+Function VarCleaner {
+    $RootLocation = $null
+    $LogFile = $null
+    $ExportFile = $null
+    $Message = $null
+    $ForegroundColor = $null
+    $CertificateName = $null
+    $KeyDescription = $null
+    $File = $null 
+    $Dates = $null
+    $Cert = $null
 
+}
+#endregion
+#region Ensure TLS 1.2
+Function ForceTLS {
+    Try {
+        If ([Net.SecurityProtocolType]::Tls12 -bor $False) {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Write-Log "`t Forced TLS 1.2 since its not server default"
+        } Else {
+            Write-Log "`t TLS 1.2 already configured as server default"
+        }
+    } Catch {
+        Write-Log "`t Unable to check or ensure TLS 1.2 status"
+        Write-Log "`t Error: $($_.Exception.Message)"
+    }
+}
+#endregion
 #region Check Log File Location
 Function CheckFilePath {
     If (Test-Path -Path "$($RootLocation)\Logs\") {}Else {
@@ -58,21 +84,27 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==          TK2 - Certificate            =="
+Write-Log "`t ==        012 - Self Certificate         =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
-Write-Log "`t Start Script Run"
 Try {
-    Write-Log "`t Step 1 - Generating the certificate"
+    Write-Log "`t Step 1 - Enforce TLS 1.2"
+    ForceTLS
+    
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 2 - Create and Install certificate"
     $Cert = New-SelfSignedCertificate -CertStoreLocation cert:\currentuser\my -Subject $CertificateName -KeyDescription $KeyDescription -NotAfter (Get-Date).AddYears($Dates)
     $Cert.Thumbprint | clip
-    Write-Log "`t Step 1.1 - Export certificate"
-    Export-Certificate -Type CERT -Cert $Cert -FilePath $ExportFilePath
+    Write-Log "`t Step 2.1 - Export certificate"
+    Export-Certificate -Type CERT -Cert $Cert -FilePath $ExportFile+$File
     Write-Log "`t Step 1.2 - Certificate exported successfully, closing the script"
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
-
+VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

@@ -1,12 +1,10 @@
 <# 
-.SYNOPSIS
-    Hide mailbox from GAL
 .DESCRIPTION 
-    Hide a list of mailbox's from the GAL (Global Address List)
+    Upload test files to SPO for versioning test
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-01-28 (YYYY-MM-DD)
+    Creation Date: 2024-04-15 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -14,11 +12,43 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$MailboxList = (Import-Csv -Path 'C:\Temp\MailboxList.csv').users
-
+$ExportFile = "$($RootLocation)\Exports\Export_$(Get-Date -Format 'yyyyMM').csv"
+# Connection
+$SiteURL = 'https://domain.sharepoint.com/teams/TestSite'
+$Tenant = 'domain.onmicrosoft.com'
+$clientID = '7777777-7777-7777-7777-777777777'
+$certThumbprint = '0000000000000000000000000000000000'
+#Files
+#Files
+$VersionCount = 100 # Number of versions for each file
+$File1 = 'C:\Temp\TheFile1.ps1'
+$File2 = 'C:\Temp\TheFile2.docx'
+$File3 = 'C:\Temp\TheFile3.xlsx'
+$File4 = 'C:\Temp\TheFile4.txt'
+$File5 = 'C:\Temp\TheFile5.csv'
 #endregion 
 
 #region Functions
+#region Variable Cleaner
+Function VarCleaner {
+    $RootLocation = $null
+    $LogFile = $null
+    $ExportFile = $null
+    $Message = $null
+    $ForegroundColor = $null
+    $SiteURL = $null
+    $Tenant = $null
+    $clientID = $null
+    $certThumbprint = $null
+    $VersionCount = $null
+    $File1 = $null
+    $File2 = $null
+    $File3 = $null
+    $File4 = $null
+    $File5 = $null
+    $i = $null
+}
+#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -67,39 +97,38 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==        Hide Mailbox from GAL          =="
+Write-Log "`t ==         013 - Test Files SPO          =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Enforce TLS 1.2"
     ForceTLS
-} Catch {
-    Write-Log "`t Error: $($_.Exception.Message)"
-}
-Try {
-    Write-Log "`t Step 2 - Connecting to Exchange Online"
-    Connect-ExchangeOnline
-} Catch {
-    Write-Log "`t Error: $($_.Exception.Message)"
-}
-Try {
-    Write-Log "`t Step 2 - Hiding the mailboxes"
-    $CountUsers = $MailboxList.count
-    $count = 1
-    Foreach ($User in $MailboxList) {
-        $CurrentUser = $User
-        Write-Progress -Activity 'Applying configuration' -Status "Current count: $($count) of $($CountUsers)" -PercentComplete (($count / $CountUsers) * 100) -CurrentOperation "Processing mailbox: $($CurrentUser)"
-        Set-EXOMailbox -Identity $User -HiddenFromAddressListsEnabled $True
-    }
-} Catch {
-    Write-Log "`t Error: $($_.Exception.Message)"
-}
-Try {
-    Write-Log "`t Step 2 - "
     
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
+Try {
+    Write-Log "`t Step 2 - Connectiong to SPO with PNP PowerSHell"
+    Connect-PnPOnline -Url $SiteURL -ClientId $clientID -Tenant $Tenant -Thumbprint $certThumbprint
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 3 - Adding 100 versions of 5 files"
+    $i = 0
+    while ($i -ne $VersionCount) {
+        Write-Host $i
+        Add-PnPFile -Path $File1 -Folder 'Shared Documents/Test_1'
+        Add-PnPFile -Path $File2 -Folder 'Shared Documents/Test_1'
+        Add-PnPFile -Path $File3 -Folder 'Shared Documents/Test_1'
+        Add-PnPFile -Path $File4 -Folder 'Shared Documents/Test_1'
+        Add-PnPFile -Path $File5 -Folder 'Shared Documents/Test_1'
+        $i++
+    }
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion
