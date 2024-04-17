@@ -119,10 +119,3 @@ Try {
 }
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion
-
-
-
-$Tester1 = $WorkSpaces[0]
-
-$Prem = $Tester1.USers
-$prem2 = $prem.AccessRight
