@@ -111,11 +111,5 @@ Try {
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
-Try {
-    Write-Log "`t Step 2 - "
-
-} Catch {
-    Write-Log "`t Error: $($_.Exception.Message)"
-}
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion
