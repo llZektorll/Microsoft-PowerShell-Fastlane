@@ -77,7 +77,7 @@ Try {
 }
 Try {
     Write-Log "`t Step 2 - Connecting to PowerBI"
-    Connect-PowerBIServiceAccount
+    #Connect-PowerBIServiceAccount
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
@@ -90,11 +90,19 @@ Try {
 Try {
     Write-Log "`t Step 4 - Sorting Information"
     Foreach ($WorkSpace in $WorkSpaces) {
-        $Permissions = $WorkSpaces.Users
-        Foreach ($Row in $Permissions) {
-            If ($Row.AccessRight -match 'Admin') {
-                $Admin_Level = $Row.AccessRight
-                $Admin_Acc = $Row.UserPrincipalName
+        $Permissions = $WorkSpace.Users
+        If ($null -eq $Permissions) {
+            $Admin_Level = 'No Users'
+            $Admin_Acc = 'No Users'
+        } Else {        
+            Foreach ($Row in $Permissions) {
+                If ($Row.AccessRight -match 'Admin') {
+                    $Admin_Level = $Row.AccessRight
+                    $Admin_Acc = $Row.UserPrincipalName
+                } Else {
+                    $Admin_Level = $Row.AccessRight
+                    $Admin_Acc = $Row.UserPrincipalName
+                }
             }
         }
         $Expoter = [PSCustomObject]@{
@@ -107,6 +115,9 @@ Try {
 
         }
         $Expoter | Export-Csv -Path $ExportFile -Delimiter ',' -NoTypeInformation -NoClobber -Encoding UTF8 -Append
+        $Permissions = $null
+        $Admin_Level = $null
+        $Admin_Acc = $null
     }
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
