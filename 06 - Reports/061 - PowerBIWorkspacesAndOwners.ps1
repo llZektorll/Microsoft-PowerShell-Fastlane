@@ -1,10 +1,10 @@
 <# 
 .DESCRIPTION 
-    Full discription
+    Get all PowerBI workspaces and the admins for each workspace
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-04-15 (YYYY-MM-DD)
+    Creation Date: 2024-04-17 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -62,16 +62,52 @@ Try {
     Write-Host "`t Unable to check folders for logs"
     Write-Host "`t Error: $($_.Exception.Message)"
 }
-Write-Log "`t ==========================================="
-Write-Log "`t ==                                       =="
-Write-Log "`t ==                title                  =="
-Write-Log "`t ==                                       =="
-Write-Log "`t ==========================================="
+Write-Log "`t ==================================================="
+Write-Log "`t ==                                               =="
+Write-Log "`t ==  061 - Export PowerBi Workspace and Owners    =="
+Write-Log "`t ==                                               =="
+Write-Log "`t ==================================================="
 Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Enforce TLS 1.2"
     ForceTLS
     
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 2 - Connecting to PowerBI"
+    #Connect-PowerBIServiceAccount
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 3 - Gathering all WorkSpaces"
+    $WorkSpaces = Get-PowerBIWorkspace -Scope Organization -All
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 4 - Sorting Information"
+    Foreach ($WorkSpace in $WorkSpaces) {
+        $Permissions = $WorkSpaces.Users
+        Foreach($Row in $Permissions){
+            If($Row.AccessRight -match 'Admin'){
+                $Admin_Level = $Row.AccessRight
+                $Admin_Acc = $Row.UserPrincipalName
+            }
+        }
+        $Expoter = [PSCustomObject]@{
+            'WorkSpace ID'              = $WorkSpace.Id
+            'WorkSpace Name'            = $WorkSpace.Name
+            'WorkSpace Type'            = $WorkSpace.Type
+            'Capacity ID'               = $WorkSpace.CapacityId
+            'WorkSpace Permissions'     = $Admin_Level
+            'WorkSpace Permission User' = $Admin_Acc
+
+        }
+        $Expoter | Export-Csv -Path $ExportFile -Delimiter ',' -NoTypeInformation -NoClobber -Encoding UTF8 -Append
+    }
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
@@ -83,3 +119,10 @@ Try {
 }
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion
+
+
+
+$Tester1 = $WorkSpaces[0]
+
+$Prem = $Tester1.USers
+$prem2 = $prem.AccessRight
