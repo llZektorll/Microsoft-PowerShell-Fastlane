@@ -25,18 +25,7 @@ $Modules = @(
 #endregion 
 
 #region Functions
-#region Variable Cleaner
-Function VarCleaner {
-    $RootLocation = $null
-    $LogFile = $null
-    $Message = $null
-    $ForegroundColor = $null
-    $Modules = $null
-    $Module = $null
-    $Step = $null
-    
-}
-#endregion
+
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -115,6 +104,5 @@ Try {
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
-VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

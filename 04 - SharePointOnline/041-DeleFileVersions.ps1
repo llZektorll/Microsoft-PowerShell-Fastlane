@@ -17,26 +17,6 @@ $MySiteToClean = 'https://domain-admin.sharepoint.com/site/TestSite'
 #endregion 
 
 #region Functions
-#region Variable Cleaner
-Function VarCleaner {
-    $RootLocation = $null
-    $LogFile = $null
-    $ExportFile = $null
-    $Message = $null
-    $ForegroundColor = $null
-    $MySiteToClean = $null
-    $Contx = $null
-    $DocumentLibraries = $null
-    $CountDocLib = $null
-    $Library = $null
-    $i = $null
-    $ListItems = $null
-    $Item = $null
-    $File = $null
-    $Versions = $null
-    $VersionsCount = $null
-}
-#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -134,6 +114,5 @@ Try {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Disconnect-PnPOnline
-VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

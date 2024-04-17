@@ -18,20 +18,6 @@ $UserList = (Import-Csv -Path 'C:\Temp\File.csv' -Delimiter ',').User
 #endregion 
 
 #region Functions
-#region Variable Cleaner
-Function VarCleaner {
-    $RootLocation = $null
-    $LogFile = $null
-    $Message = $null
-    $ForegroundColor = $null
-    $ADGroup = $null
-    $UserList = $null
-    $Account = $null
-    $User = $null
-    $Group = $null
-    $Acc = $null
-}
-#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -102,6 +88,5 @@ Try {
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
-VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

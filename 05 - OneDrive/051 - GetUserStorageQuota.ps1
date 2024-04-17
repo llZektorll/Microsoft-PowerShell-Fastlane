@@ -20,18 +20,6 @@ $OneDriveUserURL = 'https://domain.sharepoint.com/personal/'
 #endregion 
 
 #region Functions
-#region Variable Cleaner
-Function VarCleaner {
-    $RootLocation = $null
-    $LogFile = $null
-    $ExportFile = $null
-    $Message = $null
-    $ForegroundColor = $null
-    $SPOAdminUrl = $null
-    $OneDriveUserURL = $null
-    $Info = $null
-}
-#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -105,6 +93,5 @@ Try {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Disconnect-SPOService
-VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

@@ -31,20 +31,6 @@ $Selections = @(
 #endregion 
 
 #region Functions
-#region Variable Cleaner
-Function VarCleaner {
-    $RootLocation = $null
-    $LogFile = $null
-    $ExportFile = $null
-    $Message = $null
-    $ForegroundColor = $null
-    $Selections = $null
-    $Groups = $null
-    $Group = $null
-    $GroupOwner = $null
-    $Export = $null
-}
-#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -146,6 +132,5 @@ Try {
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
-VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion

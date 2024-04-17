@@ -12,7 +12,6 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports\Export_$(Get-Date -Format 'yyyyMM').csv"
 # Connection
 $SiteURL = 'https://domain.sharepoint.com/teams/TestSite'
 $Tenant = 'domain.onmicrosoft.com'
@@ -29,26 +28,6 @@ $File5 = 'C:\Temp\TheFile5.csv'
 #endregion 
 
 #region Functions
-#region Variable Cleaner
-Function VarCleaner {
-    $RootLocation = $null
-    $LogFile = $null
-    $ExportFile = $null
-    $Message = $null
-    $ForegroundColor = $null
-    $SiteURL = $null
-    $Tenant = $null
-    $clientID = $null
-    $certThumbprint = $null
-    $VersionCount = $null
-    $File1 = $null
-    $File2 = $null
-    $File3 = $null
-    $File4 = $null
-    $File5 = $null
-    $i = $null
-}
-#endregion
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -68,9 +47,6 @@ Function ForceTLS {
 Function CheckFilePath {
     If (Test-Path -Path "$($RootLocation)\Logs\") {}Else {
         New-Item "$($RootLocation)\Logs" -ItemType Directory
-    }
-    If (Test-Path -Path "$($RootLocation)\Exports\") {}Else {
-        New-Item "$($RootLocation)\Exports" -ItemType Directory
     }
 }
 #endregion
@@ -129,6 +105,5 @@ Try {
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
-VarCleaner
 Write-Log "`t More scripts like this in https://github.com/llZektorll/Microsoft-PowerShell-Fastlane"
 #endregion
