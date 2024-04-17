@@ -77,7 +77,7 @@ Try {
 }
 Try {
     Write-Log "`t Step 2 - Connecting to PowerBI"
-    #Connect-PowerBIServiceAccount
+    Connect-PowerBIServiceAccount
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
@@ -91,8 +91,8 @@ Try {
     Write-Log "`t Step 4 - Sorting Information"
     Foreach ($WorkSpace in $WorkSpaces) {
         $Permissions = $WorkSpaces.Users
-        Foreach($Row in $Permissions){
-            If($Row.AccessRight -match 'Admin'){
+        Foreach ($Row in $Permissions) {
+            If ($Row.AccessRight -match 'Admin') {
                 $Admin_Level = $Row.AccessRight
                 $Admin_Acc = $Row.UserPrincipalName
             }
