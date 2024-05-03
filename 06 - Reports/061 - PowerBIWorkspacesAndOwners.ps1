@@ -77,47 +77,57 @@ Try {
 }
 Try {
     Write-Log "`t Step 2 - Connecting to PowerBI"
-    #Connect-PowerBIServiceAccount
+    Connect-PowerBIServiceAccount
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 3 - Gathering all WorkSpaces"
+    Write-Log "`t Step 3 - Connecting to Microsoft Graph"
+    Connect-Graph
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 4 - Gathering all WorkSpaces"
     $WorkSpaces = Get-PowerBIWorkspace -Scope Organization -All
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 4 - Sorting Information"
+    Write-Log "`t Step 5 - Sorting Information"
     Foreach ($WorkSpace in $WorkSpaces) {
-        $Permissions = $WorkSpace.Users
-        If ($null -eq $Permissions) {
+        $WorkSpacePermissions = $WorkSpace.Users
+        if ($WorkSpacePermissions -eq $null -or $WorkSpacePermissions.Count -eq 0 -or ($WorkSpacePermissions | Where-Object { $_.AccessRight -contains 'None' })) {
             $Admin_Level = 'No Users'
             $Admin_Acc = 'No Users'
-        } Else {        
-            Foreach ($Row in $Permissions) {
-                If ($Row.AccessRight -match 'Admin') {
+        } else {        
+            $adminFound = $false
+            foreach ($Row in $WorkSpacePermissions) {
+                if ($Row.AccessRight -match 'Admin') {
                     $Admin_Level = $Row.AccessRight
                     $Admin_Acc = $Row.UserPrincipalName
-                } Else {
+                    $adminFound = $true
+                    break
+                } else {
                     $Admin_Level = $Row.AccessRight
                     $Admin_Acc = $Row.UserPrincipalName
                 }
             }
+            if (-not $adminFound) {
+                $Admin_Level = 'No Admin'
+                $Admin_Acc = 'No Admin'
+            }
         }
         $Expoter = [PSCustomObject]@{
-            'WorkSpace ID'              = $WorkSpace.Id
-            'WorkSpace Name'            = $WorkSpace.Name
-            'WorkSpace Type'            = $WorkSpace.Type
-            'Capacity ID'               = $WorkSpace.CapacityId
-            'WorkSpace Permissions'     = $Admin_Level
-            'WorkSpace Permission User' = $Admin_Acc
+            'WorkSpace ID'                   = $WorkSpace.Id
+            'WorkSpace Name'                 = $WorkSpace.Name
+            'WorkSpace Type'                 = $WorkSpace.Type
+            'Capacity ID'                    = $WorkSpace.CapacityId
+            'WorkSpace WorkSpacePermissions' = $Admin_Level
+            'WorkSpace Permission User'      = $Admin_Acc
 
         }
         $Expoter | Export-Csv -Path $ExportFile -Delimiter ',' -NoTypeInformation -NoClobber -Encoding UTF8 -Append
-        $Permissions = $null
-        $Admin_Level = $null
-        $Admin_Acc = $null
     }
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"

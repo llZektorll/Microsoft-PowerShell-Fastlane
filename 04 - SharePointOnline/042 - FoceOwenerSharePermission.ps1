@@ -1,10 +1,10 @@
 <# 
 .DESCRIPTION 
-    Full discription
+    Set site share permissions for only site owners
 .NOTES 
     Vertsion:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-00-00 (YYYY-MM-DD)
+    Creation Date: 2024-03-05 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -12,7 +12,7 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp'
 $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports\Export_$(Get-Date -Format 'yyyyMM').csv"
+$ExportFile = "$($RootLocation)\Exports\Export_SiteList.csv"
 #Connection
 $Tenant = 'contos.onmicrosoft.com'
 $TenantId = 'f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1'
@@ -68,11 +68,11 @@ Try {
     Write-Host "`t Unable to check folders for logs"
     Write-Host "`t Error: $($_.Exception.Message)"
 }
-Write-Log "`t ==========================================="
-Write-Log "`t ==                                       =="
-Write-Log "`t ==                title                  =="
-Write-Log "`t ==                                       =="
-Write-Log "`t ==========================================="
+Write-Log "`t ==========================================================="
+Write-Log "`t ==                                                       =="
+Write-Log "`t ==   042 - Force Site Share Permissions Only for Owner   =="
+Write-Log "`t ==                                                       =="
+Write-Log "`t ==========================================================="
 Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Enforce TLS 1.2"
@@ -81,6 +81,49 @@ Try {
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
+Try {
+    Write-Log "`t Step 2 - Connection to PNP PowerShell"
+    Connect-PnPOnline -Url $SPO_Site -Tenant $Tenant -ClientId $Application_ID -Thumbprint $Certificate_Thumb_Print -WarningAction SilentlyContinue -ErrorAction Stop
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 3 - Export all sites"
+    $Full_Site_List = Get-PnPTenantSite
+    $New_Site_List = @()
+    Foreach ($Site in $Full_Site_List) {
+        If (($Site.LockState -ne 'NoAccess') -or ($Site.Template -ne 'RedirectSite#0')) {
+            $New_Site_List += $Site
+        }
+    }
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 4 - Get list of already executed sites"
+    $History_Site_List = Import-Csv -Path $ExportFile -Delimiter ';' -Encoding UTF8
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 5 - Match for only new site to aply the changes"
+    Foreach ($Site_Url in $New_Site_List) {
+        If ($History_Site_List -notcontains $Site_Url.Url) {
+            Connect-PnPOnline -Url $Site_Url -Tenant $Tenant -ClientId $Application_ID -Thumbprint $Certificate_Thumb_Print -WarningAction SilentlyContinue -ErrorAction Stop
+            Set-PnPSite -DisableSharingForNonOwners
+            Write-Log "`t Disabled for: $($Site.Url)"
+            $ObjectExport = [pscustomobject]@{
+                'URL' = $Site.Url
+            }
+            $ObjectExport | Export-Csv -Path $ExportLocation -Delimiter ';' -Encoding UTF8 -NoClobber -NoTypeInformation -Append
+        }
+    }
+
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+
+
 Try {
     Write-Log "`t Step 2 - "
 
