@@ -15,7 +15,6 @@ $LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
 $ExportFile = "$($RootLocation)\Exports\Export_SiteList.csv"
 #Connection
 $Tenant = 'contos.onmicrosoft.com'
-$TenantId = 'f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1'
 $Application_ID = 'f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1'
 $Certificate_Thumb_Print = 'H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1'
 $SPO_Site = 'https://contoso-admin.sharepoint.com/'
@@ -101,14 +100,18 @@ Try {
 }
 Try {
     Write-Log "`t Step 4 - Get list of already executed sites"
-    $History_Site_List = Import-Csv -Path $ExportFile -Delimiter ';' -Encoding UTF8
+    If (Test-Path $ExportFile -PathType Leaf) {
+        $History_Site_List = Import-Csv -Path $ExportFile -Delimiter ';' -Encoding UTF8
+    } Else {
+        $History_Site_List = 0
+    }
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
     Write-Log "`t Step 5 - Match for only new site to aply the changes"
     Foreach ($Site_Url in $New_Site_List) {
-        If ($History_Site_List -notcontains $Site_Url.Url) {
+        If ($History_Site_List -eq 0) {
             Connect-PnPOnline -Url $Site_Url -Tenant $Tenant -ClientId $Application_ID -Thumbprint $Certificate_Thumb_Print -WarningAction SilentlyContinue -ErrorAction Stop
             Set-PnPSite -DisableSharingForNonOwners
             Write-Log "`t Disabled for: $($Site.Url)"
@@ -116,6 +119,16 @@ Try {
                 'URL' = $Site.Url
             }
             $ObjectExport | Export-Csv -Path $ExportLocation -Delimiter ';' -Encoding UTF8 -NoClobber -NoTypeInformation -Append
+        } Else {
+            If ($History_Site_List -notcontains $Site_Url.Url) {
+                Connect-PnPOnline -Url $Site_Url -Tenant $Tenant -ClientId $Application_ID -Thumbprint $Certificate_Thumb_Print -WarningAction SilentlyContinue -ErrorAction Stop
+                Set-PnPSite -DisableSharingForNonOwners
+                Write-Log "`t Disabled for: $($Site.Url)"
+                $ObjectExport = [pscustomobject]@{
+                    'URL' = $Site.Url
+                }
+                $ObjectExport | Export-Csv -Path $ExportLocation -Delimiter ';' -Encoding UTF8 -NoClobber -NoTypeInformation -Append
+            }
         }
     }
 
