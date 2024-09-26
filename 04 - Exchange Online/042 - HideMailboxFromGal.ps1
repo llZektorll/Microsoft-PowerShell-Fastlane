@@ -1,33 +1,26 @@
+#Requires -Version 7.0
 <# 
 .DESCRIPTION 
-    Upload test files to SPO for versioning test
+    Hide a mailbox from Global Address List
 .NOTES 
-    Vertsion:   1.0
+    Vertsion:   2.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-04-15 (YYYY-MM-DD)
+    Creation Date: 2024-09-02 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
-#region Variables
+#region Global Variables
 $Global:ErrorActionPreference = 'Stop'
-$RootLocation = 'C:\Temp'
-$LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-# Connection
-$SiteURL = 'https://domain.sharepoint.com/teams/TestSite'
-$Tenant = 'domain.onmicrosoft.com'
-$clientID = '7777777-7777-7777-7777-777777777'
-$certThumbprint = '0000000000000000000000000000000000'
-#Files
-#Files
-$VersionCount = 100 # Number of versions for each file
-$File1 = 'C:\Temp\TheFile1.ps1'
-$File2 = 'C:\Temp\TheFile2.docx'
-$File3 = 'C:\Temp\TheFile3.xlsx'
-$File4 = 'C:\Temp\TheFile4.txt'
-$File5 = 'C:\Temp\TheFile5.csv'
-#endregion 
-
-#region Functions
+$RootLocation = 'C:\Temp\'
+$LogFile = "$($RootLocation)Logs\Log$(Get-Date -Format 'yyyyMM').txt"
+#Connection
+$Tenant = 'MPFL.onmicrosoft.com'
+$Application_ID = 'f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1'
+$Certificate_Thumb_Print = 'H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1'
+#Account 
+$Mailbox = 'MPFL@MPFL.com'
+#endregion
+#region Main Functions
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -59,49 +52,38 @@ function Write-Log {
     function TimeStamp { return '[{0:yyyy/MM/dd} {0:HH:mm:ss}]' -f (Get-Date) }
 
     "$(TimeStamp) $Message" | Tee-Object -FilePath $LogFile -Append | Write-Verbose
-    Write-Host $Message -ForegroundColor $ForegroundColor
+    Write-Host "`n`t$($_.InvocationInfo.InvocationName) [Line:$($_.InvocationInfo.ScriptLineNumber)]: $($_.Exception.Message)" -ForegroundColor Yellow
 }
 #endregion
 #endregion
-
 #region Execution
 Try {
     CheckFilePath
 } Catch {
     Write-Host "`t Unable to check folders for logs"
-    Write-Host "`t Error: $($_.Exception.Message)"
+    Write-Log "`t Error: $($_.Exception.Message)"
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==         013 - Test Files SPO          =="
+Write-Log "`t ==     042 - Hide Mailbox from GAL       =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Enforce TLS 1.2"
     ForceTLS
-    
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 2 - Connectiong to SPO with PNP PowerSHell"
-    Connect-PnPOnline -Url $SiteURL -ClientId $clientID -Tenant $Tenant -Thumbprint $certThumbprint
+    Write-Log "`t Step 2 - Connect Exchange Online"
+    Connect-ExchangeOnline -AppId $Application_ID -CertificateThumbprint $Certificate_Thumb_Print -Organization $Tenant
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 3 - Adding 100 versions of 5 files"
-    $i = 0
-    while ($i -ne $VersionCount) {
-        Write-Host $i
-        Add-PnPFile -Path $File1 -Folder 'Shared Documents/Test_1'
-        Add-PnPFile -Path $File2 -Folder 'Shared Documents/Test_1'
-        Add-PnPFile -Path $File3 -Folder 'Shared Documents/Test_1'
-        Add-PnPFile -Path $File4 -Folder 'Shared Documents/Test_1'
-        Add-PnPFile -Path $File5 -Folder 'Shared Documents/Test_1'
-        $i++
-    }
+    Write-Log "`t Step 3 - Hiding the mailboxe"
+    Set-EXOMailbox -Identity $Mailbox -HiddenFromAddressListsEnabled $True
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }

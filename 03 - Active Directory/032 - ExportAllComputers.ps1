@@ -2,17 +2,17 @@
 .DESCRIPTION 
     Export all computers in a OU
 .NOTES 
-    Vertsion:   1.0
+    Vertsion:   2.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-04-15 (YYYY-MM-DD)
+    Creation Date: 2024-08-29 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
-#region Variables
+#region Global Variables
 $Global:ErrorActionPreference = 'Stop'
-$RootLocation = 'C:\Temp'
-$LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports\Export_$(Get-Date -Format 'yyyyMM').csv"
+$RootLocation = 'C:\Temp\'
+$LogFile = "$($RootLocation)Logs\Log$(Get-Date -Format 'yyyyMM').txt"
+$ExportFile = "$($RootLocation)Exports\Export_$(Get-Date -Format 'yyyyMM').csv"
 #Computer Information
 $Properties = @( # -> Information that will be exported
     'Name',
@@ -29,7 +29,7 @@ $Properties = @( # -> Information that will be exported
 #OU
 $OU = 'DC=contoso,DC=com'
 #endregion
-#region Functions
+#region Main Functions
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -64,28 +64,26 @@ function Write-Log {
     function TimeStamp { return '[{0:yyyy/MM/dd} {0:HH:mm:ss}]' -f (Get-Date) }
 
     "$(TimeStamp) $Message" | Tee-Object -FilePath $LogFile -Append | Write-Verbose
-    Write-Host $Message -ForegroundColor $ForegroundColor
+    Write-Host "`n`t$($_.InvocationInfo.InvocationName) [Line:$($_.InvocationInfo.ScriptLineNumber)]: $($_.Exception.Message)" -ForegroundColor Yellow
 }
 #endregion
 #endregion
-
 #region Execution
 Try {
     CheckFilePath
 } Catch {
     Write-Host "`t Unable to check folders for logs"
-    Write-Host "`t Error: $($_.Exception.Message)"
+    Write-Log "`t Error: $($_.Exception.Message)"
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==  022 - Export All Computer from OU    =="
+Write-Log "`t ==  032 - Export All Computer from OU    =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Enforce TLS 1.2"
     ForceTLS
-    
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }

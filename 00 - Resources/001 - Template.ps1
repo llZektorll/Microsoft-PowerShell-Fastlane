@@ -1,33 +1,27 @@
+#Requires -Version 7.0
 <# 
 .DESCRIPTION 
-    Export all users from OU
+    Description
 .NOTES 
-    Vertsion:   1.0
+    Vertsion:   2.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-04-15 (YYYY-MM-DD)
+    Creation Date: 2024-09-02 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
-#region Variables
+#region Global Variables
 $Global:ErrorActionPreference = 'Stop'
-$RootLocation = 'C:\Temp'
-$LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports\Export_$(Get-Date -Format 'yyyyMM').csv"
-# Users to Export
-$Properties = @(
-    'Name',
-    'UserPrincipalName',
-    'distinguishedName'
-    'mail',
-    'extensionAttribute2',
-    'extensionAttribute3',
-    'extensionAttribute5'
-)
-# OU Location
-$OU = 'DC=contoso,DC=com'
-#endregion 
-
-#region Functions
+$RootLocation = 'C:\Temp\'
+$LogFile = "$($RootLocation)Logs\Log$(Get-Date -Format 'yyyyMM').txt"
+$ExportFile = "$($RootLocation)Exports\Export_$(Get-Date -Format 'yyyyMM').csv"
+#Connection
+$Tenant = 'MPFL.onmicrosoft.com'
+$TenantId = 'f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1'
+$Application_ID = 'f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1'
+$CertThumbprint = 'H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1'
+$SPO_Site = 'https://MPFL-admin.sharepoint.com/'
+#endregion
+#region Main Functions
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -62,47 +56,32 @@ function Write-Log {
     function TimeStamp { return '[{0:yyyy/MM/dd} {0:HH:mm:ss}]' -f (Get-Date) }
 
     "$(TimeStamp) $Message" | Tee-Object -FilePath $LogFile -Append | Write-Verbose
-    Write-Host $Message -ForegroundColor $ForegroundColor
+    Write-Host "`n`t$($_.InvocationInfo.InvocationName) [Line:$($_.InvocationInfo.ScriptLineNumber)]: $($_.Exception.Message)" -ForegroundColor Yellow
 }
 #endregion
 #endregion
-
 #region Execution
 Try {
     CheckFilePath
 } Catch {
     Write-Host "`t Unable to check folders for logs"
-    Write-Host "`t Error: $($_.Exception.Message)"
+    Write-Log "`t Error: $($_.Exception.Message)"
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==     024 - Expor all User from OU      =="
+Write-Log "`t ==                title                  =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Enforce TLS 1.2"
     ForceTLS
-    
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 2 - Collecting Users"
-    $GetUsers = Get-ADUser -SearchBase $OU -Properties $Properties | Select-Object $Properties
-    Write-Log "`t Step 2.2 - Exporting Informaiton"
-    Foreach ($User in $GetUsers) {
-        $ObjectDetail = [PSCustomObject][Ordered]@{
-            'Name'                = $User.Name
-            'UserPrincipalName'   = $User.UserPrincipalName
-            'distinguishedName'   = $User.distinguishedName
-            'mail'                = $User.mail
-            'extensionAttribute2' = $User.extensionAttribute2
-            'extensionAttribute3' = $User.extensionAttribute3
-            'extensionAttribute5' = $User.extensionAttribute5
-        }
-        $ObjectDetail | Export-Csv $ExportFile -Delimiter ',' -Encoding UTF8 -NoClobber -NoTypeInformation -Append -Force
-    }
+    Write-Log "`t Step 2 - "
+
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }

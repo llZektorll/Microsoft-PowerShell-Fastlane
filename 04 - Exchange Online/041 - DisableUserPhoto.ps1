@@ -1,27 +1,24 @@
+#Requires -Version 7.0
 <# 
 .DESCRIPTION 
-    Create and install a certificate
+    Removes the permission to edit the profile picture on the default policy
 .NOTES 
-    Vertsion:   1.0
+    Vertsion:   2.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-04-15 (YYYY-MM-DD)
+    Creation Date: 2024-09-02 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
-#region Variables
+#region Global Variables
 $Global:ErrorActionPreference = 'Stop'
-$RootLocation = 'C:\Temp'
-$LogFile = "$($RootLocation)\Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-$ExportFile = "$($RootLocation)\Exports\"
-#Certificate Variables
-$CertificateName = 'MyCertificate'
-$KeyDescription = 'Certificate for Azure App Registration'
-$File = 'MyCertificate.cer'
-$Dates = 1 # Certificate valid for X years
-#endregion 
-
-#region Functions
-
+$RootLocation = 'C:\Temp\'
+$LogFile = "$($RootLocation)Logs\Log$(Get-Date -Format 'yyyyMM').txt"
+#Connection
+$Tenant = 'MPFL.onmicrosoft.com'
+$Application_ID = 'f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1'
+$Certificate_Thumb_Print = 'H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1'
+#endregion
+#region Main Functions
 #region Ensure TLS 1.2
 Function ForceTLS {
     Try {
@@ -42,9 +39,6 @@ Function CheckFilePath {
     If (Test-Path -Path "$($RootLocation)\Logs\") {}Else {
         New-Item "$($RootLocation)\Logs" -ItemType Directory
     }
-    If (Test-Path -Path "$($RootLocation)\Exports\") {}Else {
-        New-Item "$($RootLocation)\Exports" -ItemType Directory
-    }
 }
 #endregion
 #region Write Log
@@ -56,38 +50,38 @@ function Write-Log {
     function TimeStamp { return '[{0:yyyy/MM/dd} {0:HH:mm:ss}]' -f (Get-Date) }
 
     "$(TimeStamp) $Message" | Tee-Object -FilePath $LogFile -Append | Write-Verbose
-    Write-Host $Message -ForegroundColor $ForegroundColor
+    Write-Host "`n`t$($_.InvocationInfo.InvocationName) [Line:$($_.InvocationInfo.ScriptLineNumber)]: $($_.Exception.Message)" -ForegroundColor Yellow
 }
 #endregion
 #endregion
-
 #region Execution
 Try {
     CheckFilePath
 } Catch {
     Write-Host "`t Unable to check folders for logs"
-    Write-Host "`t Error: $($_.Exception.Message)"
+    Write-Log "`t Error: $($_.Exception.Message)"
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==        012 - Self Certificate         =="
+Write-Log "`t ==       041 - Disable User Photo        =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
 Try {
     Write-Log "`t Step 1 - Enforce TLS 1.2"
     ForceTLS
-    
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 2 - Create and Install certificate"
-    $Cert = New-SelfSignedCertificate -CertStoreLocation cert:\currentuser\my -Subject $CertificateName -KeyDescription $KeyDescription -NotAfter (Get-Date).AddYears($Dates)
-    $Cert.Thumbprint | clip
-    Write-Log "`t Step 2.1 - Export certificate"
-    Export-Certificate -Type CERT -Cert $Cert -FilePath $ExportFile+$File
-    Write-Log "`t Step 1.2 - Certificate exported successfully, closing the script"
+    Write-Log "`t Step 2 - Connection to Exchange Online"
+    Connect-ExchangeOnline -AppId $Application_ID -CertificateThumbprint $Certificate_Thumb_Print -Organization $Tenant
+} Catch {
+    Write-Log "`t Error: $($_.Exception.Message)"
+}
+Try {
+    Write-Log "`t Step 3 - Removing permissions to edit the photo on the default policy"
+    Set-OwaMailboxPolicy -Identity OwaMailboxPolicy-Default -SetPhotoEnabled $False
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }

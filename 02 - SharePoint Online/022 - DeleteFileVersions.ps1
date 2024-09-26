@@ -1,10 +1,10 @@
 <# 
 .DESCRIPTION 
-    New Computer Full Microsoft 365 Administration configuration
+    Force remove all files verions
 .NOTES 
     Vertsion:   2.0
     Author: Hugo Santos (https://github.com/llZektorll)
-    Creation Date: 2024-08-29 (YYYY-MM-DD)
+    Creation Date: 2024-09-02 (YYYY-MM-DD)
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
@@ -12,16 +12,11 @@
 $Global:ErrorActionPreference = 'Stop'
 $RootLocation = 'C:\Temp\'
 $LogFile = "$($RootLocation)Logs\Log$(Get-Date -Format 'yyyyMM').txt"
-#Modules to Install
-$Modules = @(
-    'AzureAD',
-    'ExchangeOnlineManagement',
-    'Microsoft.Graph',
-    'Microsoft.Online.SharePoint.PowerShell',
-    'MicrosoftTeams',
-    'PNP.PowerShell',
-    'MicrosoftPowerBIMgmt'
-)
+#Connection
+$TenantId = 'f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1'
+$Application_ID = 'f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1'
+$CertThumbprint = 'H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1H1'
+$SPO_Site = 'https://MPFL-admin.sharepoint.com/'
 #endregion
 #region Main Functions
 #region Ensure TLS 1.2
@@ -68,7 +63,7 @@ Try {
 }
 Write-Log "`t ==========================================="
 Write-Log "`t ==                                       =="
-Write-Log "`t ==          011 - New Machine            =="
+Write-Log "`t ==   022 - Delete all files versions     =="
 Write-Log "`t ==                                       =="
 Write-Log "`t ==========================================="
 Write-Log "`t Start Script Run"
@@ -79,22 +74,38 @@ Try {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 2 - Getting PowerShell 7"
-    winget install --id Microsoft.Powershell --source winget
+    Write-Log "`t Step 2 - Connect to PnPOnline"
+    Connect-PnPOnline -Url $SPO_Site -Tenant $TenantId -ClientId $Application_ID -Thumbprint $CertThumbprint
 } Catch {
     Write-Log "`t Error: $($_.Exception.Message)"
 }
 Try {
-    Write-Log "`t Step 3 - Installing Modules"
-    $Step = 1
-    Foreach ($Module in $Modules) {
-        Try {
-            Install-Module -Name $Module -Confirm:$False -Force
-            Write-Log "`t Step 2.$($Step) - Module $Module installed"
-            $Step++
-        } Catch {
-            Write-Log "`t Step 2.$($Step) - Unable to install $Module Module"
-            Write-Log "`t Error: $($_.Exception.Message)"
+    Write-Log "`t Step 3 - Gather all sites and delete files versions"
+    $All_Sites = Get-PnPTenantSite
+    Foreach ($Site in $All_Sites) {
+        Connect-PnPOnline -Url $Site.Url -Tenant $TenantId -ClientId $Application_ID -Thumbprint $CertThumbprint
+        $Contx = Get-PnPContext
+        $DocumentLibraries = Get-PnPList | Where-Object { $_.BaseType -eq 'DocumentLibrary' -and $_.Hidden -eq $false }
+        $i = 1
+        $CountDocLib = $DocumentLibraries.count
+        Foreach ($Library in $DocumentLibraries) {
+            Write-Progress -Activity 'Cleaning Versions' -Status "Current count: $($i) of $($CountDocLib) Document Libraries" -PercentComplete (($i / $CountDocLib) * 100) 
+            Write-Log "`t Processing Document Library:'$Library.Title"
+            $ListItems = Get-PnPListItem -List $Library -PageSize 2000 | Where-Object { $_.FileSystemObjectType -eq 'File' }
+            Foreach ($Item in $ListItems) {
+                #Get File Versions
+                $File = $Item.File
+                $Versions = $File.Versions
+                $Contx.Load($File)
+                $Contx.Load($Versions)
+                $Contx.ExecuteQuery()
+                $VersionsCount = $Versions.Count
+                If ($VersionsCount -gt 0) {
+                    $Versions.DeleteAll()
+                    Invoke-PnPQuery
+                }
+            }
+            $i++
         }
     }
 } Catch {
