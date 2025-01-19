@@ -2,7 +2,7 @@
 .DESCRIPTION 
     This script will create a UI for the configurations and costumization of Microsoft 365
 .NOTES 
-    Version:   0.0.12
+    Version:   0.0.1
     Author: Hugo Santos 
     GitHub: https://github.com/llZektorll
     Creation Date: 2025-01-19 (YYYY-MM-DD)
@@ -13,11 +13,9 @@ If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     Write-Warning "You do not have Administrator rights to run this script!`nPlease re-run this script as an Administrator!"
     Break
 }
-
 # Load DLLs
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
-
 #region Variables 
 #Global Variables
 [String]$Root_Path = $MyInvocation.MyCommand.Path
@@ -31,11 +29,6 @@ $sync.ProcessRunning = $false
 $Log_Dir = "C:\Temp\MPFL-M365\Logs)"
 $Log_Export = "C:\Temp\MPFL-M365\Export)"
 #endregion
-
-#App Configuration
-
-
-#Sync Configurations
 Function Sync-Update {
     If ($Sync.ProcessRunning -eq $false) {
         #Question user to check for updates
@@ -67,7 +60,3 @@ Function Sync-Update {
         }
     }
 }
-
-
-
-Sync-Update
