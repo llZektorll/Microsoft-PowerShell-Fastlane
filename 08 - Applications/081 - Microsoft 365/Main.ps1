@@ -2,7 +2,7 @@
 .DESCRIPTION 
     This script will create a UI for the configurations and costumization of Microsoft 365
 .NOTES 
-    Vertsion:   1.0
+    Version:   1.0
     Author: Hugo Santos (https://github.com/llZektorll)
     Creation Date: 2025-01-19 (YYYY-MM-DD)
 #>
