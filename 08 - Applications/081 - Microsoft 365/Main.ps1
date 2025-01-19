@@ -24,7 +24,7 @@ Add-Type -AssemblyName System.Windows.Forms
 #Version Control
 $Sync = [hashtable]::Synchronized(@{})
 $Sync.PSScriptRoot = $Root_Path
-$Sync.Version = '0.0.1'
+$Sync.Version = '0.0.12'
 $Sync.Config = @{}
 $sync.ProcessRunning = $false
 #Base Directory
