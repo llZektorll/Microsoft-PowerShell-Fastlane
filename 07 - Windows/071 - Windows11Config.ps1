@@ -33,7 +33,7 @@ Function Sync-Update {
         $Check_Updates = [System.Windows.MessageBox]::Show("Do you want to check for updates", "MPFL - M365", [System.Windows.MessageBoxButton]::YesNo, [System.Windows.MessageBoxImage]::Warning)
         If ($Check_Updates -match "Yes") {
             #Link to Repository
-            $GitHub_File = ""
+            $GitHub_File = "https://raw.githubusercontent.com/llZektorll/Microsoft-PowerShell-Fastlane/refs/heads/main/07%20-%20Windows/071%20-%20Windows11Config.ps1"
             try {
                 # Fetch the file from GitHub
                 $GitHub_File_Control = Invoke-WebRequest -Uri $GitHub_File -UseBasicParsing
@@ -61,5 +61,6 @@ Function Sync-Update {
 #endregion
 
 #region main
+Sync-Update
 
 #endregion
