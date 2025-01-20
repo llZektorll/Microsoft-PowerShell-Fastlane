@@ -29,12 +29,19 @@ If ((Get-Item $Script_Name -ErrorAction SilentlyContinue)) {
 Function Compilation {
     #Script Compitlation
     $Script_Content = [System.Collections.Generic.List[string]]::new()
+
     $Header = Get-Content -Path "$($Script_Dir)\Resources\Header.ps1" -Raw
     $Script_Content.Add($Header)
+
     $Variables = Get-Content -Path "$($Script_Dir)\Resources\Variables.ps1" -Raw
     $Script_Content.Add($Variables)
+
     $Functions = Get-Content -Path "$($Script_Dir)\Resources\Functions.ps1" -Raw
     $Script_Content.Add($Functions)
+
+    $Footer = Get-Content -Path "$($Script_Dir)\Resources\Footer.ps1" -Raw
+    $Script_Content.Add($Footer)
+
     Set-Content -Path "$($Script_Dir)\$($Script_Name)" -Value ($script_content -join "`r`n") -Encoding UTF8
 }
 Compilation

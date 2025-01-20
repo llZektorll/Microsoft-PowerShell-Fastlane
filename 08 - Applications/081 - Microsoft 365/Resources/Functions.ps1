@@ -1,3 +1,4 @@
+#Sync with GitHub version
 Function Sync-Update {
     If ($Sync.ProcessRunning -eq $false) {
         #Question user to check for updates
@@ -28,4 +29,79 @@ Function Sync-Update {
             Continue
         }
     }
+}
+
+#Log manager
+Function Write-Log{
+    Param(
+        [Parameter(Mandatory=$true)]
+        [String]$Message,
+        [Parameter(Mandatory=$true)]
+        [String]$Type
+    )
+    $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $Log = "$Date - $Type - $Message"
+    $Log | Out-File -FilePath "$Log_Dir\$(Get-Date -Format "yyyy-MM-dd").log" -Append -NoClobber -Encoding utf8
+}
+
+# Text box configuration
+Function TextBox{
+    Param(
+        [Parameter(Mandatory=$true)]
+        [String]$Name,
+        [Parameter(Mandatory=$true)]
+        [String]$Text,
+        [Parameter(Mandatory=$true)]
+        [Int]$X,
+        [Parameter(Mandatory=$true)]
+        [Int]$Y,
+        [Parameter(Mandatory=$true)]
+        [Int]$Width,
+        [Parameter(Mandatory=$true)]
+        [Int]$Height
+    )
+    $TextBox = New-Object System.Windows.Forms.TextBox
+    $TextBox.Name = $Name
+    $TextBox.Text = $Text
+    $TextBox.Location = New-Object System.Drawing.Point($X, $Y)
+    $TextBox.Width = $Width
+    $TextBox.Height = $Height
+    $TextBox
+    $GUI.Controls.Add($TextBox)
+    Return $TextBox
+}
+
+# Check box configuration
+Function CheckBox{
+    Param(
+        [Parameter(Mandatory=$true)]
+        [String]$Name,
+        [Parameter(Mandatory=$true)]
+        [String]$Text,
+        [Parameter(Mandatory=$true)]
+        [Int]$X,
+        [Parameter(Mandatory=$true)]
+        [Int]$Y,
+        [Parameter(Mandatory=$true)]
+        [Int]$Width,
+        [Parameter(Mandatory=$true)]
+        [Int]$Height
+    )
+    $CheckBox = New-Object System.Windows.Forms.CheckBox
+    $CheckBox.Name = $Name
+    $CheckBox.Text = $Text
+    $CheckBox.Location = New-Object System.Drawing.Point($X, $Y)
+    $CheckBox.Width = $Width
+    $CheckBox.Height = $Height
+    $CheckBox
+    $GUI.Controls.Add($CheckBox)
+    Return $CheckBox
+}
+
+# Get all checkboxes that are selected
+Function Get-SelectedCheckBoxes{
+    $Button = New-Object System.Windows.Forms.Button
+    $Button.Text = "Apply Configuration"
+    $Button.Location = New-Object System.Drawing.Point(50, 50)
+    $Gui.Controls.Add($Button)
 }

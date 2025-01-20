@@ -14,5 +14,12 @@ If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     Break
 }
 # Load DLLs
-Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+[System.Windows.Forms.Application]::EnableVisualStyles()
+
+
+$Gui = New-Object System.Windows.Forms.Form
+$Gui.Text = "MPFL - Microsoft 365"
+$Gui.AutoSize = $true
+$Gui.AutoScale = $true

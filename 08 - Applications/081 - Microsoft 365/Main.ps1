@@ -2,7 +2,7 @@
 .DESCRIPTION 
     This script will create a UI for the configurations and costumization of Microsoft 365
 .NOTES 
-    Version:   0.0.12
+    Version:   0.0.13
     Author: Hugo Santos 
     GitHub: https://github.com/llZektorll
     Creation Date: 2025-01-19 (YYYY-MM-DD)
@@ -24,7 +24,7 @@ Add-Type -AssemblyName System.Windows.Forms
 #Version Control
 $Sync = [hashtable]::Synchronized(@{})
 $Sync.PSScriptRoot = $Root_Path
-$Sync.Version = '0.0.12'
+$Sync.Version = '0.0.13'
 $Sync.Config = @{}
 $sync.ProcessRunning = $false
 #Base Directory
