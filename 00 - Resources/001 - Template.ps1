@@ -3,10 +3,10 @@
 .DESCRIPTION 
     Description
 .NOTES 
-    Vertsion:   2.0
+    Vertsion:   3.0
     Author: Hugo Santos 
     GitHub: https://github.com/llZektorll
-    Creation Date: 2025-01-01 (YYYY-MM-DD)
+    Creation Date: 2025-01-01
 .LINK 
     Script repository: https://github.com/llZektorll/Microsoft-PowerShell-Fastlane
 #>
