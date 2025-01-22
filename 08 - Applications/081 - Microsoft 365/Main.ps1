@@ -1,6 +1,6 @@
 ﻿<# 
 .DESCRIPTION 
-    This script will create a UI for the configurations and costumization of Microsoft 365
+    This script will create a UI for the configurations and costumization of Microsoft 365 
 .NOTES 
     Version:   0.0.13
     Author: Hugo Santos 
