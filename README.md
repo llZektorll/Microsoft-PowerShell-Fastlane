@@ -6,10 +6,6 @@
 
 This repository contains a number of scripts that I have written or re-configured to enhance its performance or to fit my needs. All the scripts are meant to make a day-to-day life easier for a Microsoft 365 Administrator and a System Administrator. These are provided for free under the MIT License.
 
-##  Project update
-
-2022-05-22 -> This project have suffered a major update. All the files have been moved around to fit the new organization of the project.
-
 # Using the scripts
 
 To use the scripts it is recommended to download the repository since each script must be ran on you local machine/server. 
