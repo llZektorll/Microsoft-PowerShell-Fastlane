@@ -4,7 +4,7 @@
 
 # Project Information
 
-This repository contains a number of scripts that I have written or re-configured to enhance it's performance or to fit my needs. All the scripts are meant to make a day-to-day life easier for a Microsoft 365 Administrator and a System Administrator. These are provided for free under the MIT License.
+This repository contains a number of scripts that I have written or re-configured to enhance its performance or to fit my needs. All the scripts are meant to make a day-to-day life easier for a Microsoft 365 Administrator and a System Administrator. These are provided for free under the MIT License.
 
 ##  Project update
 
